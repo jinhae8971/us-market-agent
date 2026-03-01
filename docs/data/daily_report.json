@@ -362,5 +362,39 @@
     "market_weather": "partly_cloudy",
     "market_weather_icon": "⛅",
     "market_weather_en": "Hold — Mixed Signals"
+  },
+  "backtest": {
+    "agent_rankings": [
+      {
+        "name": "TechMomentum",
+        "avatar": "📈",
+        "hit_rate": 0.0,
+        "total_predictions": 0,
+        "correct": 0
+      },
+      {
+        "name": "MacroFed",
+        "avatar": "🏛️",
+        "hit_rate": 0.0,
+        "total_predictions": 0,
+        "correct": 0
+      },
+      {
+        "name": "SectorRotation",
+        "avatar": "🔄",
+        "hit_rate": 0.0,
+        "total_predictions": 0,
+        "correct": 0
+      },
+      {
+        "name": "ValueFundamental",
+        "avatar": "💎",
+        "hit_rate": 0.0,
+        "total_predictions": 0,
+        "correct": 0
+      }
+    ],
+    "yesterday_comparison": null,
+    "today_moderator": "Moderator"
   }
 }
