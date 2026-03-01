@@ -6,8 +6,8 @@ run_pipeline.py — US Market Agent 전체 파이프라인 진입점
   2. 에이전트 초기화 (TechMo / MacroFed / SectorRot / ValueFund)
   3. Phase 1+2 토론 실행 (DebateEngine)
   4. Phase 3 종합 판단 (Moderator)
-  5. 보고서 저장 (docs/data/daily_report.json)
-  6. 히스토리 아카이브 (data/history/{date}.json)
+  5. 백테스트 (전일 예측 vs 실제 S&P500 등락 비교)
+  6. 보고서 저장 (docs/data/daily_report.json + data/history/)
   7. Telegram 알림 (선택)
 """
 import json
@@ -31,6 +31,7 @@ from agents import (
 )
 from orchestrator.debate_engine import DebateEngine
 from orchestrator.moderator     import Moderator
+from orchestrator.backtester    import Backtester
 from scripts.collect_data       import collect_market_data
 
 # ─── 설정 ─────────────────────────────────────────────────────────────────────
@@ -146,32 +147,48 @@ def main() -> dict:
         f"— {verdict.get('market_weather_icon','')} {verdict.get('market_weather_en','')}"
     )
 
-    # ── Step 5: 보고서 조립 ────────────────────────────────────────────────────
+    # ── Step 5: 백테스트 ───────────────────────────────────────────────────────
+    logger.info("Step 5: 백테스트 (전일 예측 vs 실제 S&P500)")
+    data_dir  = ROOT / "data"
+    backtester = Backtester(data_dir=str(data_dir))
+
+    sp500_change = (
+        market_data.get("indices", {})
+        .get("SP500", {})
+        .get("change_pct", 0.0)
+    )
+    backtest_result = backtester.run(sp500_change)
+    today_moderator = backtest_result.get("today_moderator", "Moderator")
+    logger.info(f"  오늘의 Moderator: {today_moderator}")
+    if backtest_result.get("yesterday_comparison"):
+        yc = backtest_result["yesterday_comparison"]
+        logger.info(f"  전일 실제 방향: {yc['actual_movement']}")
+
+    # ── Step 6: 보고서 조립 ────────────────────────────────────────────────────
     report = {
         "date":         today_str,
         "generated_at": market_data.get("collected_at", today_str),
         "market_data":  market_data,
         "debate":       debate_result,
         "verdict":      verdict,
+        "backtest":     backtest_result,
     }
 
-    # ── Step 6: 저장 ──────────────────────────────────────────────────────────
-    logger.info("Step 6: 보고서 저장")
+    # ── Step 7: 저장 ──────────────────────────────────────────────────────────
+    logger.info("Step 7: 보고서 저장")
     docs_dir = ROOT / "docs" / "data"
-    hist_dir = ROOT / "data" / "history"
     docs_dir.mkdir(parents=True, exist_ok=True)
-    hist_dir.mkdir(parents=True, exist_ok=True)
 
     report_path = docs_dir / "daily_report.json"
-    hist_path   = hist_dir / f"{today_str}.json"
+    with open(report_path, "w", encoding="utf-8") as f:
+        json.dump(report, f, ensure_ascii=False, indent=2, default=str)
+    logger.info(f"  저장: {report_path}")
 
-    for path in [report_path, hist_path]:
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(report, f, ensure_ascii=False, indent=2, default=str)
-        logger.info(f"  저장: {path}")
+    # history 아카이브 (backtester.archive_report 활용)
+    backtester.archive_report(report, today_str)
 
-    # ── Step 7: Telegram 알림 ────────────────────────────────────────────────
-    logger.info("Step 7: Telegram 알림")
+    # ── Step 8: Telegram 알림 ────────────────────────────────────────────────
+    logger.info("Step 8: Telegram 알림")
     send_telegram(verdict, today_str)
 
     logger.info("=" * 60)

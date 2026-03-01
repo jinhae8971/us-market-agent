@@ -106,6 +106,16 @@
         market_weather_icon: "🌤️",
         market_weather_en: "Cautious Optimism",
       },
+      backtest: {
+        agent_rankings: [
+          { name:"TechMomentum",    avatar:"📈", hit_rate:0.0, total_predictions:0, correct:0 },
+          { name:"MacroFed",        avatar:"🏛️", hit_rate:0.0, total_predictions:0, correct:0 },
+          { name:"SectorRotation",  avatar:"🔄", hit_rate:0.0, total_predictions:0, correct:0 },
+          { name:"ValueFundamental",avatar:"💎", hit_rate:0.0, total_predictions:0, correct:0 },
+        ],
+        yesterday_comparison: null,
+        today_moderator: "Moderator",
+      },
     };
 
     // ─── 유틸 ─────────────────────────────────────────────────────────────────
@@ -429,6 +439,87 @@
       );
     }
 
+    // ─── BacktestLeaderboard ─────────────────────────────────────────────────
+    function BacktestLeaderboard({ backtest }) {
+      if (!backtest) return null;
+      const { agent_rankings: rankings, yesterday_comparison: yc, today_moderator: todayMod } = backtest;
+      const hasData = rankings && rankings.length > 0 && rankings.some(r => r.total_predictions > 0);
+
+      const movementIcon = m => m === "UP" ? "📈" : m === "DOWN" ? "📉" : "➡️";
+      const movementColor = m => m === "UP" ? "text-green-400" : m === "DOWN" ? "text-red-400" : "text-slate-400";
+
+      return (
+        <div className="card-bg rounded-xl border border-blue-900/30 p-4 mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-xs text-slate-400 font-semibold">🏆 에이전트 적중률 리더보드</div>
+            {todayMod && todayMod !== "Moderator" && (
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-slate-500">오늘의 중재자</span>
+                <span className="text-xs font-bold text-yellow-300 bg-yellow-900/30 border border-yellow-700/30 px-2 py-0.5 rounded-full">
+                  👑 {todayMod}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {!hasData && (
+            <div className="flex flex-col items-center justify-center py-6 text-center">
+              <div className="text-3xl mb-3">📊</div>
+              <p className="text-sm font-semibold text-slate-300 mb-1">데이터 누적 중</p>
+              <p className="text-xs text-slate-500">다음 거래일 분석 후부터 S&P500 예측 적중률이 집계됩니다</p>
+            </div>
+          )}
+
+          {hasData && (
+            <div className="space-y-2 mb-4">
+              {(rankings || []).map((r, i) => {
+                const hitPct = r.total_predictions > 0 ? Math.round(r.hit_rate * 100) : 0;
+                const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i+1}.`;
+                const barColor = hitPct >= 60 ? "bg-green-500" : hitPct >= 40 ? "bg-yellow-500" : "bg-red-500";
+                return (
+                  <div key={r.name} className="flex items-center gap-2">
+                    <span className="text-sm w-6 text-center">{medal}</span>
+                    <span className="text-base w-6 text-center">{r.avatar}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className="text-xs font-semibold text-slate-200">{r.name}</span>
+                        <span className="text-xs text-slate-400 mono">{r.correct}/{r.total_predictions} ({hitPct}%)</span>
+                      </div>
+                      <div className="h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
+                        <div className={`h-full progress-bar rounded-full ${barColor}`} style={{width:`${hitPct}%`}} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {yc && (
+            <div className="border-t border-slate-700/40 pt-3 mt-3">
+              <div className="text-xs text-slate-400 mb-2">
+                📅 어제 ({yc.date}) S&P500 실제 움직임:
+                <span className={`font-bold ml-1 ${movementColor(yc.actual_movement)}`}>
+                  {movementIcon(yc.actual_movement)} {yc.actual_movement}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {(yc.predictions || []).map((p, i) => (
+                  <div key={i} className={`flex items-center gap-1 text-xs px-2 py-1 rounded-lg border ${p.was_correct ? "bg-green-900/20 border-green-700/30 text-green-300" : "bg-red-900/20 border-red-700/30 text-red-300"}`}>
+                    <span>{p.avatar}</span>
+                    <span className="font-semibold">{p.agent}</span>
+                    <span className="text-slate-400">→</span>
+                    <span>{p.prediction}</span>
+                    <span>{p.was_correct ? "✅" : "❌"}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
     // ─── App ─────────────────────────────────────────────────────────────────
     function App() {
       const [report, setReport] = useState(null);
@@ -451,7 +542,7 @@
         </div>
       );
 
-      const { date, generated_at, market_data: md, debate, verdict } = report;
+      const { date, generated_at, market_data: md, debate, verdict, backtest } = report;
 
       return (
         <div className="min-h-screen">
@@ -475,6 +566,7 @@
                 <TopStocks stocks={md.top_stocks} />
               </div>
             </div>
+            <BacktestLeaderboard backtest={backtest} />
             <DebateTimeline reports={debate.phase1_reports} critiques={debate.phase2_critiques} />
             <div className="text-center py-8 text-xs text-slate-600">
               <div className="mb-1">🤖 US Market Agent — Multi-Agent Debate System</div>
