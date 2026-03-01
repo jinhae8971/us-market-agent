@@ -1,0 +1,136 @@
+{
+  "date": "2026-03-01",
+  "generated_at": "2026-03-01T00:00:00",
+  "domain_data": {
+    "collected_at": "2026-03-01T00:00:00",
+    "indices": {
+      "SP500": {"price": 5767.57, "change_pct": 0.55},
+      "NASDAQ": {"price": 18190.29, "change_pct": 0.77},
+      "DJIA": {"price": 43840.91, "change_pct": 0.33},
+      "RUT": {"price": 2093.65, "change_pct": 0.21},
+      "VIX": {"price": 19.81, "change_pct": -3.12}
+    },
+    "rates": {
+      "US10Y": 4.42,
+      "US3M": 5.31,
+      "yield_spread": -0.89
+    },
+    "dxy": {"price": 107.45},
+    "sectors": {
+      "XLK": {"name": "Technology", "change_pct": 1.23},
+      "XLF": {"name": "Financials", "change_pct": 0.67},
+      "XLE": {"name": "Energy", "change_pct": -0.45},
+      "XLV": {"name": "Healthcare", "change_pct": 0.34},
+      "XLI": {"name": "Industrials", "change_pct": 0.56},
+      "XLP": {"name": "Cons. Staples", "change_pct": -0.12},
+      "XLY": {"name": "Cons. Disc.", "change_pct": 0.89},
+      "XLU": {"name": "Utilities", "change_pct": -0.78},
+      "XLRE": {"name": "Real Estate", "change_pct": -0.33}
+    },
+    "top_stocks": {
+      "AAPL": {"price": 227.63, "change_pct": 1.12},
+      "MSFT": {"price": 415.22, "change_pct": 0.93},
+      "NVDA": {"price": 131.38, "change_pct": 2.45},
+      "AMZN": {"price": 224.73, "change_pct": 0.78},
+      "GOOGL": {"price": 195.87, "change_pct": 0.45},
+      "META": {"price": 601.23, "change_pct": 1.67},
+      "TSLA": {"price": 278.41, "change_pct": -1.23},
+      "JPM": {"price": 245.67, "change_pct": 0.54},
+      "BRK-B": {"price": 474.88, "change_pct": 0.22}
+    },
+    "technical_sp500": {
+      "rsi_14": 55.3,
+      "macd": 12.4,
+      "macd_signal": 8.9,
+      "bb_upper": 5890.2,
+      "bb_lower": 5645.3,
+      "ma5": 5752.3,
+      "ma20": 5689.1,
+      "ma60": 5591.4
+    },
+    "valuation": {
+      "forward_pe_estimated": 21.4,
+      "eps_growth_estimate": 10.5,
+      "fed_watch_cut_prob": 32.1
+    }
+  },
+  "debate": {
+    "phase1_reports": [
+      {
+        "agent_name": "TechMomentum",
+        "role": "Technical Momentum Analyst",
+        "avatar": "📈",
+        "analysis": "S&P500 RSI(14) 55.3 — 중립 구간이나 상승 모멘텀 유지. MACD가 시그널 위에 위치(12.4 vs 8.9)하며 골든크로스 신호. VIX 19.8은 공포 완화 국면. 볼린저밴드 상단(5890) 대비 현재가 여유 있어 추가 상승 여지. MA5(5752)가 MA20(5689) 위에 있어 단기 강세 유효.",
+        "key_points": ["MACD 골든크로스 — 매수 신호", "RSI 과매수 아님, 상승 여지 충분", "VIX 20 미만 — 리스크온 환경"],
+        "confidence_score": 72,
+        "stance": "BUY"
+      },
+      {
+        "agent_name": "MacroFed",
+        "role": "Macro & Fed Policy Analyst",
+        "avatar": "🏛️",
+        "analysis": "연준 금리 인하 확률 32.1% — 시장이 인하를 충분히 반영하지 못한 상태. 10Y-3M 스프레드 -0.89%로 역전 지속, 경기침체 경고 신호. DXY 107.45 강달러가 다국적기업 실적에 역풍. 연내 2회 이상 인하 시나리오 축소로 유동성 기대 약화.",
+        "key_points": ["장단기 금리역전 지속 — 경기침체 경보", "강달러(107) — 수출/다국적기업 실적 부담", "연준 인하 확률 낮아 — 유동성 기대 제한"],
+        "confidence_score": 65,
+        "stance": "HOLD"
+      },
+      {
+        "agent_name": "SectorRotation",
+        "role": "Sector Rotation & Market Structure Analyst",
+        "avatar": "🔄",
+        "analysis": "XLK(+1.23%) 주도로 기술주 리더십 유효. XLY(+0.89%) 소비재 동반 강세는 경기 자신감 반영. XLE(-0.45%), XLU(-0.78%) 방어주 약세는 리스크온 신호. XLRE(-0.33%) 부동산 약세는 고금리 지속 반영. 현재 사이클: 후기 확장(Late Expansion) — 성장주 선호 지속 예상.",
+        "key_points": ["기술+소비재 강세 = 리스크온 사이클", "에너지·유틸리티 약세 = 방어적 자산 외면", "후기 확장 국면 — 성장주 선호 유지"],
+        "confidence_score": 68,
+        "stance": "BUY"
+      },
+      {
+        "agent_name": "ValueFundamental",
+        "role": "Value & Fundamental Analyst",
+        "avatar": "💎",
+        "analysis": "S&P500 선행 P/E 21.4배 — 역사적 평균(16-17배) 대비 25% 프리미엄. EPS 성장 추정치 10.5%는 현재 밸류에이션을 정당화하기에 불충분. Mag7 집중도 리스크: 7종목이 시총의 30% 차지. 금리역전 하 할인율 상승은 성장주 DCF 가치를 압박. 충분한 안전마진 부재.",
+        "key_points": ["P/E 21.4배 — 역사적 고평가 수준", "EPS 성장(10.5%) vs 밸류에이션 프리미엄 미스매치", "Mag7 집중 리스크 — 분산 부재"],
+        "confidence_score": 70,
+        "stance": "HOLD"
+      }
+    ],
+    "phase2_critiques": [
+      {
+        "from_agent": "TechMomentum",
+        "to_agent": "ValueFundamental",
+        "critique": "가치투자 관점의 P/E 분석은 현재 AI 인프라 투자 사이클을 과소평가합니다. RSI·MACD는 현재 매수 세력이 펀더멘털 논쟁보다 강함을 보여줍니다. 과거 P/E 평균은 금리 0%대 시절 기준 — 현재 구조와 비교 부적합합니다."
+      },
+      {
+        "from_agent": "MacroFed",
+        "to_agent": "SectorRotation",
+        "critique": "섹터 로테이션은 현재 스냅샷에 지나치게 의존합니다. 역전된 수익률 곡선(-0.89%)은 6-18개월 후 경기침체를 70% 확률로 예고합니다. 리스크온 섹터 강세가 정점 신호일 가능성을 배제할 수 없습니다."
+      },
+      {
+        "from_agent": "SectorRotation",
+        "to_agent": "MacroFed",
+        "critique": "거시 지표는 후행적입니다. 시장은 이미 경기침체 리스크를 가격에 반영하고 섹터 재편으로 대응 중입니다. XLK+XLY 동반 강세가 지속되는 한 매크로 비관론보다 현재 자금 흐름이 더 신뢰할 수 있는 신호입니다."
+      },
+      {
+        "from_agent": "ValueFundamental",
+        "to_agent": "TechMomentum",
+        "critique": "기술적 지표는 군중 심리의 반영일 뿐입니다. 2000년 닷컴 버블에서도 MACD는 붕괴 직전까지 골든크로스를 유지했습니다. P/E 21.4배에서 모멘텀을 추종하는 것은 역사적으로 가장 위험한 투자 행태입니다."
+      }
+    ]
+  },
+  "verdict": {
+    "final_stance": "BUY",
+    "confidence_score": 65,
+    "summary": "기술적 모멘텀(MACD 골든크로스, RSI 중립)과 리스크온 섹터 구조(XLK·XLY 주도)가 단기 상승 여건을 지지합니다. 다만 밸류에이션 부담(P/E 21.4배)과 금리역전 지속은 중장기 리스크 요인입니다. 연준 정책 변화와 EPS 시즌에 주목하며 비중 유지를 권고합니다.",
+    "key_insights": ["기술주·소비재 동반 강세 — 리스크온 사이클 유효", "VIX 20 미만 유지 시 상승 모멘텀 지속 예상", "강달러와 금리역전은 하반기 실적 리스크 요인"],
+    "risk_factors": ["P/E 21.4배 역사적 고평가", "장단기 금리역전 지속 (-0.89%)", "DXY 강달러 다국적기업 실적 역풍"],
+    "action_items": ["기술주(XLK) 포지션 유지, 유틸리티·부동산 비중 축소", "VIX 25 돌파 시 방어주 전환 검토", "Q1 EPS 서프라이즈 여부에 따라 6월 포지션 재검토"],
+    "stance_votes": {
+      "TechMomentum": "BUY",
+      "MacroFed": "HOLD",
+      "SectorRotation": "BUY",
+      "ValueFundamental": "HOLD"
+    },
+    "market_weather": "partly_cloudy",
+    "market_weather_icon": "⛅",
+    "market_weather_en": "Partly Cloudy"
+  }
+}
