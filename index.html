@@ -1481,36 +1481,27 @@ function detectAgentKey(name) {
 }
 
 // ════════════════════════════════════════════════
-//  Data Loading — daily_report.json 우선, history 폴백
-//  (docs/ 폴더 기준: pipeline이 docs/data/daily_report.json에 저장)
+//  Data Loading — 오늘/어제 날짜 자동 시도
 // ════════════════════════════════════════════════
 async function loadLatestData() {
-  const t = Date.now();
-
-  // 1차: docs/data/daily_report.json (파이프라인 기본 저장 경로)
-  try {
-    const res = await fetch(`./data/daily_report.json?t=${t}`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.date) return data;
-    }
-  } catch (_) {}
-
-  // 2차: data/history/ 날짜 폴백 (최근 7일)
   const today = new Date();
+  const dates = [];
   for (let i = 0; i < 7; i++) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().slice(0, 10);
+    dates.push(d.toISOString().slice(0, 10));
+  }
+
+  for (const date of dates) {
     try {
-      const res = await fetch(`../data/history/${dateStr}.json?t=${t}`);
+      const res = await fetch(`./data/history/${date}.json?t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
-        if (data && data.date) return data;
+        return data;
       }
     } catch (_) {}
   }
-  throw new Error('데이터 파일을 찾을 수 없습니다. (daily_report.json + 최근 7일 history 모두 실패)');
+  throw new Error('최근 7일 내 데이터 파일을 찾을 수 없습니다.');
 }
 
 // ════════════════════════════════════════════════
