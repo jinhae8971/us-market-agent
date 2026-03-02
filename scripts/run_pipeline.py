@@ -28,6 +28,7 @@ from agents import (
     MacroFedAgent,
     SectorRotationAgent,
     ValueFundamentalAgent,
+    GlobalNewsAgent,
 )
 from orchestrator.debate_engine import DebateEngine
 from orchestrator.moderator     import Moderator
@@ -116,18 +117,20 @@ def main() -> dict:
     logger.info("Step 1: 시장 데이터 수집")
     market_data = collect_market_data()
 
-    # ── Step 2: 에이전트 초기화 ────────────────────────────────────────────────
-    logger.info("Step 2: 에이전트 초기화")
+    # ── Step 2: 에이전트 초기화 (5인 구성 — NewsAgent 추가) ───────────────────
+    news_count = market_data.get("news", {}).get("total_count", 0)
+    logger.info(f"Step 2: 에이전트 초기화 (입력 뉴스 {news_count}건)")
     agents = [
         TechMomentumAgent(client, MODEL),    # idx 0 — 기술적 모멘텀
         MacroFedAgent(client, MODEL),         # idx 1 — Fed·거시경제
         SectorRotationAgent(client, MODEL),   # idx 2 — 섹터 로테이션
         ValueFundamentalAgent(client, MODEL), # idx 3 — 가치·펀더멘털
+        GlobalNewsAgent(client, MODEL),       # idx 4 — 24h 글로벌 뉴스 [NEW]
     ]
     logger.info(f"  에이전트: {[a.name for a in agents]}")
 
     # ── Step 3: 토론 (Phase 1+2) ───────────────────────────────────────────────
-    logger.info("Step 3: 토론 실행 (Phase 1 독립 분석 + Phase 2 교차 반론)")
+    logger.info("Step 3: 5인 토론 실행 (Phase 1 독립 분석 + Phase 2 교차 반론)")
     engine       = DebateEngine(agents)
     debate_result = engine.run(market_data)
     logger.info(f"  Phase 1 분석 {len(debate_result['phase1_reports'])}건, "
