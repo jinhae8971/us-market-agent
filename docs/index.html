@@ -1,2142 +1,849 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>US Market Agent 🇺🇸 — AI Debate Terminal</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<style>
-/* ════════════════════════════════════════════
-   ROOT VARIABLES
-════════════════════════════════════════════ */
-:root {
-  --bg-primary:   #080c18;
-  --bg-secondary: #0d1526;
-  --bg-card:      #111927;
-  --bg-card2:     #0f1d2e;
-  --border:       #1e3050;
-  --border-glow:  #3a2010;
-  --us-accent:    #ff8c42;
-  --us-accent2:   #fb923c;
-  --green:        #00e676;
-  --red:          #ff1744;
-  --yellow:       #ffd740;
-  --purple:       #a78bfa;
-  --blue:         #60a5fa;
-  --teal:         #34d399;
-  --text-primary: #e8f4ff;
-  --text-muted:   #5a7a9a;
-  --text-dim:     #3a5a7a;
-  /* Agent colors */
-  --agent-tech:   #60a5fa;
-  --agent-macro:  #a78bfa;
-  --agent-sector: #34d399;
-  --agent-value:  #fbbf24;
-  --agent-news:   #f472b6;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-html { scroll-behavior: smooth; }
-
-body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: 'Segoe UI', -apple-system, 'Apple SD Gothic Neo', sans-serif;
-  font-size: 13px;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* ════════════════════════════════════════════
-   HEADER
-════════════════════════════════════════════ */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 20px;
-  background: linear-gradient(180deg, #06080e 0%, var(--bg-secondary) 100%);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-
-.header-logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: var(--us-accent);
-  text-shadow: 0 0 20px rgba(255,140,66,0.5);
-}
-
-.header-logo .flag { font-size: 18px; }
-
-.header-center { text-align: center; }
-.header-time { font-size: 11px; color: var(--text-muted); }
-.header-time span { color: var(--yellow); font-weight: 600; }
-.next-update { font-size: 10px; color: var(--text-dim); margin-top: 1px; }
-
-.header-right {
-  text-align: right;
-  font-size: 11px;
-  color: var(--text-dim);
-}
-
-/* ════════════════════════════════════════════
-   INDEX BAR
-════════════════════════════════════════════ */
-.index-bar {
-  display: flex;
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.index-bar::-webkit-scrollbar { display: none; }
-
-.index-item {
-  display: flex;
-  flex-direction: column;
-  padding: 7px 16px;
-  border-right: 1px solid var(--border);
-  min-width: 110px;
-  flex-shrink: 0;
-}
-
-.index-name { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 2px; text-transform: uppercase; }
-.index-val  { font-size: 14px; font-weight: 700; font-family: 'Courier New', monospace; }
-.index-chg  { font-size: 10px; font-weight: 600; }
-
-/* ════════════════════════════════════════════
-   VERDICT PANEL (AI 최종 판단)
-════════════════════════════════════════════ */
-.verdict-panel {
-  background: linear-gradient(135deg, #0e1a0a 0%, #120e06 50%, #0a0e1a 100%);
-  border-bottom: 1px solid var(--border-glow);
-  padding: 14px 20px;
-  position: relative;
-  overflow: hidden;
-}
-
-.verdict-panel::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--us-accent), var(--yellow), var(--green), transparent);
-}
-
-.verdict-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-}
-
-.verdict-badge {
-  background: linear-gradient(135deg, #2a1806, #1a0e04);
-  border: 1px solid var(--us-accent);
-  border-radius: 4px;
-  padding: 3px 10px;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--us-accent);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-.verdict-meta { font-size: 11px; color: var(--text-muted); }
-
-/* Stance + Weather 카드 */
-.verdict-top {
-  display: flex;
-  align-items: stretch;
-  gap: 12px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-}
-
-.stance-card {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-}
-
-.stance-weather {
-  font-size: 28px;
-  line-height: 1;
-}
-
-.stance-info { display: flex; flex-direction: column; gap: 3px; }
-
-.stance-label {
-  font-size: 9px;
-  color: var(--text-muted);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-.stance-value {
-  font-size: 20px;
-  font-weight: 900;
-  letter-spacing: 2px;
-}
-.stance-value.HOLD  { color: var(--yellow); }
-.stance-value.BUY   { color: var(--green);  }
-.stance-value.SELL  { color: var(--red);    }
-
-.stance-en { font-size: 10px; color: var(--text-muted); }
-
-/* Confidence + Votes */
-.confidence-block {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 14px;
-  flex-shrink: 0;
-  min-width: 160px;
-}
-
-.conf-label { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; }
-.conf-score { font-size: 26px; font-weight: 900; color: var(--us-accent); font-family: 'Courier New', monospace; }
-.conf-bar-track {
-  height: 4px;
-  background: rgba(30,48,80,0.6);
-  border-radius: 2px;
-  margin: 6px 0;
-}
-.conf-bar-fill {
-  height: 100%;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #7c3a0a, var(--us-accent));
-  transition: width 0.8s ease;
-}
-
-/* Stance votes */
-.votes-block {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 14px;
-  flex-shrink: 0;
-}
-
-.votes-label { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; }
-
-.votes-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px;
-}
-
-.vote-chip {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 4px 7px;
-  font-size: 10px;
-}
-.vote-agent { color: var(--text-muted); font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.vote-stance { font-weight: 700; font-size: 10px; }
-.vote-stance.HOLD { color: var(--yellow); }
-.vote-stance.BUY  { color: var(--green);  }
-.vote-stance.SELL { color: var(--red);    }
-
-/* Summary / Key Insights / Risks / Actions */
-.verdict-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.verdict-block {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 8px 12px;
-}
-
-.vblock-title {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  margin-bottom: 5px;
-  color: var(--yellow);
-}
-.vblock-title.green { color: var(--green); }
-.vblock-title.red   { color: var(--red);   }
-.vblock-title.blue  { color: var(--blue);  }
-
-.vblock-text {
-  font-size: 11px;
-  color: #c0d8f0;
-  line-height: 1.65;
-}
-
-.insight-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.insight-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 5px;
-  font-size: 10px;
-  color: #c0d8f0;
-  line-height: 1.5;
-}
-
-.insight-list li::before {
-  content: '▸';
-  color: var(--us-accent);
-  flex-shrink: 0;
-  margin-top: 1px;
-  font-size: 9px;
-}
-
-.risk-list li::before  { content: '⚠'; color: var(--red);   font-size: 8px; }
-.action-list li::before{ content: '→'; color: var(--green); font-size: 9px; }
-
-/* ════════════════════════════════════════════
-   MAIN CONTENT AREA
-════════════════════════════════════════════ */
-.main-content {
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  min-height: calc(100vh - 300px);
-}
-
-/* ── LEFT PANEL (섹터 + 종목) ── */
-.left-panel {
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-}
-
-.left-panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 16px;
-  background: linear-gradient(135deg, #1a0e06, #2a1608);
-  border-bottom: 1px solid var(--border);
-}
-
-.panel-title {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: var(--us-accent);
-}
-.panel-sub { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
-.panel-sentiment { font-size: 11px; color: var(--text-muted); }
-
-.chart-section {
-  padding: 10px 16px 6px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-  height: 260px;
-}
-
-.section-title {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-.chart-wrapper {
-  position: relative;
-  height: calc(100% - 24px);
-}
-
-/* ── STOCK TABLE ── */
-.stocks-section {
-  padding: 10px 16px;
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.stocks-table {
-  flex: 1;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-.stocks-table::-webkit-scrollbar { width: 4px; }
-.stocks-table::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-table { width: 100%; border-collapse: collapse; }
-
-thead th {
-  font-size: 9px;
-  font-weight: 700;
-  color: var(--text-dim);
-  letter-spacing: 1px;
-  text-align: left;
-  padding: 4px 6px;
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  background: var(--bg-card);
-  z-index: 1;
-  text-transform: uppercase;
-}
-thead th.num { text-align: right; }
-
-tbody tr {
-  border-bottom: 1px solid rgba(30,48,80,0.35);
-  transition: background 0.15s;
-}
-tbody tr:hover { background: rgba(255,140,66,0.04); }
-
-tbody td { padding: 5px 6px; font-size: 11px; }
-td.rank  { color: var(--text-dim); font-size: 10px; width: 20px; }
-td.stock-name { font-weight: 600; }
-td.sector-tag { color: var(--text-muted); font-size: 10px; }
-td.price { font-family: 'Courier New', monospace; color: #a8c8e8; text-align: right; }
-td.chg-pct, td.volume, td.mcap { text-align: right; }
-td.up   { color: var(--green); font-weight: 700; }
-td.down { color: var(--red);   font-weight: 700; }
-td.flat { color: var(--text-muted); }
-td.volume { color: var(--text-muted); font-size: 10px; }
-
-/* ── RIGHT PANEL (Technical + Fed Watch) ── */
-.right-panel {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* Technical Indicators */
-.tech-section {
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--border);
-}
-
-.tech-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  margin-top: 6px;
-}
-
-.tech-card {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 7px 10px;
-}
-
-.tech-card-label {
-  font-size: 9px;
-  color: var(--text-muted);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-bottom: 3px;
-}
-
-.tech-card-val {
-  font-size: 16px;
-  font-weight: 700;
-  font-family: 'Courier New', monospace;
-  color: var(--text-primary);
-}
-
-.tech-card-sub {
-  font-size: 9px;
-  color: var(--text-muted);
-  margin-top: 1px;
-}
-
-/* RSI gauge */
-.rsi-bar-wrap { margin-top: 4px; }
-.rsi-track {
-  position: relative;
-  height: 5px;
-  background: linear-gradient(90deg, rgba(255,23,68,0.4) 0%, rgba(255,215,64,0.4) 30%, rgba(0,230,118,0.4) 50%, rgba(255,215,64,0.4) 70%, rgba(255,23,68,0.4) 100%);
-  border-radius: 3px;
-}
-.rsi-needle {
-  position: absolute;
-  top: -3px;
-  width: 3px;
-  height: 11px;
-  background: var(--us-accent);
-  border-radius: 2px;
-  transform: translateX(-50%);
-  transition: left 0.8s ease;
-  box-shadow: 0 0 4px var(--us-accent);
-}
-.rsi-labels {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 2px;
-  font-size: 8px;
-  color: var(--text-dim);
-}
-
-/* MACD indicator */
-.macd-sign {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  margin-top: 2px;
-}
-
-/* BB Position */
-.bb-track {
-  position: relative;
-  height: 5px;
-  background: rgba(30,48,80,0.6);
-  border-radius: 3px;
-  margin-top: 4px;
-}
-.bb-fill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  background: linear-gradient(90deg, #1e4a7a, var(--blue));
-  border-radius: 3px;
-  transition: width 0.8s ease;
-}
-.bb-needle {
-  position: absolute;
-  top: -3px;
-  width: 3px;
-  height: 11px;
-  background: var(--blue);
-  border-radius: 2px;
-  transform: translateX(-50%);
-  transition: left 0.8s ease;
-  box-shadow: 0 0 4px var(--blue);
-}
-
-/* MA Status row */
-.ma-status {
-  grid-column: 1 / -1;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 7px 10px;
-}
-.ma-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 4px;
-}
-.ma-chip {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 3px 7px;
-  font-size: 9px;
-}
-.ma-name  { color: var(--text-muted); font-size: 9px; }
-.ma-diff  { font-weight: 700; font-size: 9px; }
-
-/* ── FED WATCH SECTION ── */
-.fed-section {
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--border);
-}
-
-.fed-bars {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 6px;
-}
-
-.fed-bar-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.fed-bar-label { width: 50px; font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
-
-.fed-bar-track {
-  flex: 1;
-  height: 14px;
-  background: rgba(30,48,80,0.5);
-  border-radius: 7px;
-  overflow: hidden;
-  position: relative;
-}
-
-.fed-bar-fill {
-  height: 100%;
-  border-radius: 7px;
-  transition: width 0.8s ease;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 6px;
-  font-size: 9px;
-  font-weight: 700;
-  color: #fff;
-  white-space: nowrap;
-}
-
-.fed-bar-fill.hold { background: linear-gradient(90deg, #1e4a7a, var(--yellow)); }
-.fed-bar-fill.cut  { background: linear-gradient(90deg, #0a3a1a, var(--green));  }
-.fed-bar-fill.hike { background: linear-gradient(90deg, #3a0a0a, var(--red));    }
-
-/* ── RATES & VALUATION ── */
-.rates-section {
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--border);
-}
-
-.rates-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  margin-top: 6px;
-}
-
-.rate-chip {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  padding: 6px 8px;
-  text-align: center;
-}
-.rate-label { font-size: 9px; color: var(--text-muted); margin-bottom: 2px; }
-.rate-val   { font-size: 13px; font-weight: 700; font-family: 'Courier New', monospace; }
-.rate-sub   { font-size: 9px; color: var(--text-dim); }
-
-/* ── EARNINGS / VALUATION ── */
-.earnings-section {
-  padding: 10px 14px;
-  flex: 1;
-}
-
-.earn-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 5px;
-  margin-top: 6px;
-}
-
-.earn-chip {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  padding: 6px 8px;
-}
-.earn-label { font-size: 9px; color: var(--text-muted); margin-bottom: 2px; }
-.earn-val   { font-size: 14px; font-weight: 700; color: var(--text-primary); }
-
-/* ════════════════════════════════════════════
-   AGENT DEBATE SECTION
-════════════════════════════════════════════ */
-.debate-section {
-  background: var(--bg-primary);
-  border-top: 2px solid var(--border-glow);
-  padding: 16px 20px 20px;
-  position: relative;
-}
-
-.debate-section::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg,
-    transparent,
-    var(--agent-tech),
-    var(--agent-macro),
-    var(--agent-sector),
-    var(--agent-value),
-    var(--agent-news),
-    transparent);
-}
-
-.debate-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-}
-
-.debate-badge {
-  background: linear-gradient(135deg, #1a0e06, #1a1006);
-  border: 1px solid var(--us-accent);
-  border-radius: 4px;
-  padding: 3px 10px;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--us-accent);
-  letter-spacing: 1px;
-}
-
-.debate-sub { font-size: 11px; color: var(--text-muted); }
-
-/* Agent cards grid */
-.agents-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.agent-card {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.agent-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--border);
-}
-
-.agent-card.tech-mo    .agent-card-header { background: linear-gradient(135deg, rgba(96,165,250,0.12), rgba(96,165,250,0.04));   border-top: 2px solid var(--agent-tech);   }
-.agent-card.macro-fed  .agent-card-header { background: linear-gradient(135deg, rgba(167,139,250,0.12), rgba(167,139,250,0.04)); border-top: 2px solid var(--agent-macro);  }
-.agent-card.sector-rot .agent-card-header { background: linear-gradient(135deg, rgba(52,211,153,0.12), rgba(52,211,153,0.04));   border-top: 2px solid var(--agent-sector); }
-.agent-card.value-fund .agent-card-header { background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(251,191,36,0.04));   border-top: 2px solid var(--agent-value);  }
-.agent-card.global-news .agent-card-header { background: linear-gradient(135deg, rgba(244,114,182,0.12), rgba(244,114,182,0.04)); border-top: 2px solid var(--agent-news);  }
-
-.agent-avatar { font-size: 20px; }
-
-.agent-name-wrap { flex: 1; margin: 0 6px; }
-.agent-name { font-size: 11px; font-weight: 700; color: var(--text-primary); }
-.agent-role { font-size: 9px; color: var(--text-muted); line-height: 1.3; }
-
-.agent-stance {
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 1px;
-  padding: 2px 7px;
-  border-radius: 3px;
-  flex-shrink: 0;
-}
-.agent-stance.HOLD { color: var(--yellow); background: rgba(255,215,64,0.12); }
-.agent-stance.BUY  { color: var(--green);  background: rgba(0,230,118,0.12); }
-.agent-stance.SELL { color: var(--red);    background: rgba(255,23,68,0.12); }
-
-.agent-card-body {
-  padding: 10px 12px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.agent-confidence {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.conf-dots { display: flex; gap: 2px; }
-.conf-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--border);
-  transition: background 0.3s;
-}
-.conf-dot.active.tech-mo    { background: var(--agent-tech); }
-.conf-dot.active.macro-fed  { background: var(--agent-macro); }
-.conf-dot.active.sector-rot { background: var(--agent-sector); }
-.conf-dot.active.value-fund { background: var(--agent-value); }
-.conf-dot.active.global-news { background: var(--agent-news); }
-
-.conf-num {
-  font-size: 10px;
-  color: var(--text-muted);
-  font-family: 'Courier New', monospace;
-}
-
-.agent-key-points {
-  flex: 1;
-}
-
-.kp-title {
-  font-size: 9px;
-  font-weight: 700;
-  color: var(--text-dim);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
-.kp-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.kp-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 4px;
-  font-size: 10px;
-  color: #b0c8e0;
-  line-height: 1.5;
-}
-
-.kp-bullet {
-  flex-shrink: 0;
-  margin-top: 3px;
-  font-size: 6px;
-  color: var(--text-dim);
-}
-
-.agent-card.tech-mo    .kp-bullet { color: var(--agent-tech); }
-.agent-card.macro-fed  .kp-bullet { color: var(--agent-macro); }
-.agent-card.sector-rot .kp-bullet { color: var(--agent-sector); }
-.agent-card.value-fund .kp-bullet { color: var(--agent-value); }
-.agent-card.global-news .kp-bullet { color: var(--agent-news); }
-
-/* Full analysis toggle */
-.agent-analysis-toggle {
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--text-dim);
-  font-size: 9px;
-  padding: 3px 8px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.2s;
-  width: 100%;
-  text-align: center;
-  margin-top: 4px;
-}
-.agent-analysis-toggle:hover {
-  color: var(--text-muted);
-  border-color: var(--text-muted);
-  background: rgba(255,255,255,0.03);
-}
-
-.agent-analysis-full {
-  display: none;
-  font-size: 10px;
-  color: #a0c0d8;
-  line-height: 1.65;
-  padding: 8px 0 4px;
-  border-top: 1px solid var(--border);
-  margin-top: 4px;
-}
-.agent-analysis-full.expanded { display: block; }
-
-/* ════════════════════════════════════════════
-   PHASE 2 CRITIQUES
-════════════════════════════════════════════ */
-.critique-section {
-  margin-top: 4px;
-}
-
-.critique-header-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.critique-badge {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 2px 8px;
-  font-size: 9px;
-  font-weight: 700;
-  color: var(--text-muted);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-.critiques-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-
-.critique-card {
-  background: rgba(255,255,255,0.015);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 8px 10px;
-  font-size: 10px;
-  color: #8aaccc;
-  line-height: 1.6;
-}
-
-.critique-from {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-bottom: 6px;
-  font-size: 9px;
-}
-.cf-from-badge {
-  padding: 1px 6px;
-  border-radius: 3px;
-  font-weight: 700;
-  font-size: 9px;
-}
-.cf-arrow { color: var(--text-dim); }
-.cf-to-badge {
-  padding: 1px 6px;
-  border-radius: 3px;
-  font-weight: 700;
-  font-size: 9px;
-  opacity: 0.7;
-}
-
-/* ════════════════════════════════════════════
-   PULSE & LOADING
-════════════════════════════════════════════ */
-@keyframes pulse-glow {
-  0%,100% { opacity: 1; }
-  50%      { opacity: 0.4; }
-}
-.live-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--green);
-  animation: pulse-glow 2s ease-in-out infinite;
-  display: inline-block;
-  margin-right: 4px;
-}
-
-.loading-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(8,12,24,0.96);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 200;
-  gap: 16px;
-}
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--border);
-  border-top-color: var(--us-accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-text { color: var(--text-muted); font-size: 13px; letter-spacing: 1px; }
-
-.error-banner {
-  background: rgba(255,23,68,0.08);
-  border: 1px solid rgba(255,23,68,0.3);
-  border-radius: 6px;
-  padding: 8px 16px;
-  color: var(--red);
-  font-size: 11px;
-  margin: 8px 20px;
-  display: none;
-}
-
-/* ════════════════════════════════════════════
-   MOBILE TABS
-════════════════════════════════════════════ */
-.mobile-tabs { display: none; }
-
-/* ════════════════════════════════════════════
-   RESPONSIVE — Tablet (768px ~ 1199px)
-════════════════════════════════════════════ */
-@media (max-width: 1399px) {
-  .agents-grid    { grid-template-columns: repeat(3, 1fr); }
-}
-
-@media (max-width: 1199px) {
-  .agents-grid    { grid-template-columns: repeat(2, 1fr); }
-  .critiques-grid { grid-template-columns: repeat(2, 1fr); }
-  .verdict-grid   { grid-template-columns: 1fr 1fr; }
-  .verdict-grid .verdict-block:first-child { grid-column: 1 / -1; }
-}
-
-@media (max-width: 1023px) {
-  .main-content {
-    grid-template-columns: 1fr;
-  }
-  .left-panel {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-  .chart-section { height: 240px; }
-  .stocks-section { height: auto; overflow: visible; }
-  .stocks-table { max-height: 360px; }
-  .right-panel { flex-direction: row; flex-wrap: wrap; }
-  .tech-section, .fed-section, .rates-section, .earnings-section {
-    flex: 1 1 300px;
-    border-bottom: 1px solid var(--border);
-  }
-}
-
-/* ════════════════════════════════════════════
-   RESPONSIVE — Mobile (< 768px)
-════════════════════════════════════════════ */
-@media (max-width: 767px) {
-  body { font-size: 12px; }
-
-  /* Header */
-  .header { padding: 8px 12px; flex-wrap: wrap; gap: 4px; }
-  .header-logo { font-size: 13px; letter-spacing: 1px; }
-  .next-update { display: none; }
-
-  /* Index bar → 4×2 grid on mobile */
-  .index-bar {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    overflow-x: visible;
-  }
-  .index-item {
-    min-width: auto;
-    padding: 5px 8px;
-    border-right: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-  .index-item:nth-child(4),
-  .index-item:nth-child(8) { border-right: none; }
-  .index-item:nth-child(5),
-  .index-item:nth-child(6),
-  .index-item:nth-child(7),
-  .index-item:nth-child(8) { border-bottom: none; }
-  .index-name { font-size: 8px; }
-  .index-val  { font-size: 12px; }
-  .index-chg  { font-size: 9px; }
-
-  /* Mobile Tab 스위처 */
-  .mobile-tabs {
-    display: flex;
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 53px;
-    z-index: 30;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .mobile-tabs::-webkit-scrollbar { display: none; }
-  .mobile-tab {
-    flex: 0 0 auto;
-    padding: 10px 14px;
-    background: transparent;
-    border: none;
-    border-bottom: 3px solid transparent;
-    color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: color 0.2s, border-color 0.2s, background 0.2s;
-  }
-  .mobile-tab.active {
-    color: var(--us-accent);
-    border-bottom-color: var(--us-accent);
-    background: rgba(255,140,66,0.06);
-  }
-
-  /* Verdict Panel mobile */
-  .verdict-panel { padding: 10px 12px; }
-  .verdict-top { gap: 8px; }
-  .stance-card { padding: 8px 12px; gap: 8px; }
-  .stance-weather { font-size: 22px; }
-  .stance-value { font-size: 16px; }
-  .conf-score { font-size: 20px; }
-  .verdict-grid { grid-template-columns: 1fr; }
-  .verdict-grid .verdict-block:first-child { grid-column: auto; }
-
-  /* Main content mobile */
-  .main-content { grid-template-columns: 1fr; }
-  .left-panel { border-right: none; }
-  .chart-section { height: 200px; padding: 8px 12px 6px; }
-  .stocks-section { padding: 8px 12px; height: auto; overflow: visible; }
-  .stocks-table { max-height: none; overflow-y: visible; }
-
-  /* 테이블 컬럼 숨김 */
-  table thead th:nth-child(3),
-  table tbody td:nth-child(3),
-  table thead th:nth-child(6),
-  table tbody td:nth-child(6) { display: none; }
-  table { font-size: 11px; }
-  tbody td { padding: 6px 4px; }
-
-  /* Right panel mobile */
-  .right-panel { flex-direction: column; }
-  .tech-section, .fed-section, .rates-section, .earnings-section {
-    flex: none;
-  }
-  .tech-grid { grid-template-columns: repeat(2, 1fr); }
-  .rates-grid { grid-template-columns: repeat(3, 1fr); }
-
-  /* Debate section mobile */
-  .debate-section { padding: 12px; }
-  .agents-grid { grid-template-columns: 1fr; gap: 10px; }
-  .critiques-grid { grid-template-columns: 1fr; }
-
-  /* Mobile section visibility (controlled by JS) */
-  .mobile-section { display: none; }
-  .mobile-section.active { display: block; }
-  .mobile-section-always { display: block !important; }
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>US Market Agent 🇺🇸</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+    * { font-family: 'Noto Sans KR', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    body { background: #080c18; color: #e2e8f0; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0d1526; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+    .glow-buy  { box-shadow: 0 0 20px rgba(0,230,118,0.25); }
+    .glow-sell { box-shadow: 0 0 20px rgba(255,23,68,0.25); }
+    .glow-hold { box-shadow: 0 0 20px rgba(255,215,64,0.25); }
+
+    .bubble-left  { border-radius: 4px 18px 18px 18px; }
+    .bubble-right { border-radius: 18px 4px 18px 18px; }
+
+    @keyframes pulse-slow { 0%,100%{opacity:1} 50%{opacity:.6} }
+    .pulse-slow { animation: pulse-slow 3s infinite; }
+
+    .card-gradient { background: linear-gradient(135deg, #111927 0%, #080c18 100%); }
+    .header-gradient { background: linear-gradient(135deg, #080c18 0%, #1a0e06 50%, #080c18 100%); }
+
+    .progress-bar { transition: width 1s ease-in-out; }
+
+    .tag-buy  { background: rgba(0,230,118,0.15); color: #00e676; border: 1px solid rgba(0,230,118,0.3); }
+    .tag-sell { background: rgba(255,23,68,0.15); color: #ff1744; border: 1px solid rgba(255,23,68,0.3); }
+    .tag-hold { background: rgba(255,215,64,0.15); color: #ffd740; border: 1px solid rgba(255,215,64,0.3); }
+
+    .us-accent { color: #ff8c42; }
+    .us-glow { text-shadow: 0 0 20px rgba(255,140,66,0.5); }
+
+    /* Agent accent colors */
+    .agent-tech   { border-color: #60a5fa !important; }
+    .agent-macro  { border-color: #a78bfa !important; }
+    .agent-sector { border-color: #34d399 !important; }
+    .agent-value  { border-color: #fbbf24 !important; }
+    .agent-news   { border-color: #f472b6 !important; }
+  </style>
 </head>
 <body>
+  <div id="root"></div>
 
-<!-- LOADING -->
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="spinner"></div>
-  <div class="loading-text">🇺🇸 US Market Agent 데이터 로딩 중...</div>
-</div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
 
-<!-- ══════════════════════════════════════════════
-     HEADER
-══════════════════════════════════════════════ -->
-<div class="header">
-  <div class="header-logo">
-    <span class="flag">🇺🇸</span>
-    US MARKET AGENT
-  </div>
-  <div class="header-center">
-    <div class="header-time">업데이트: <span id="lastUpdate">—</span></div>
-    <div class="next-update" id="nextUpdate"></div>
-  </div>
-  <div class="header-right">
-    <span class="live-dot"></span>AI DEBATE SYSTEM
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════
-     INDEX BAR
-══════════════════════════════════════════════ -->
-<div class="index-bar" id="indexBar">
-  <div class="index-item">
-    <span class="index-name">S&amp;P 500</span>
-    <span class="index-val" id="sp500-val">—</span>
-    <span class="index-chg" id="sp500-chg">—</span>
-  </div>
-  <div class="index-item">
-    <span class="index-name">NASDAQ</span>
-    <span class="index-val" id="nasdaq-val">—</span>
-    <span class="index-chg" id="nasdaq-chg">—</span>
-  </div>
-  <div class="index-item">
-    <span class="index-name">DOW</span>
-    <span class="index-val" id="djia-val">—</span>
-    <span class="index-chg" id="djia-chg">—</span>
-  </div>
-  <div class="index-item">
-    <span class="index-name">RUSSELL</span>
-    <span class="index-val" id="rut-val">—</span>
-    <span class="index-chg" id="rut-chg">—</span>
-  </div>
-  <div class="index-item">
-    <span class="index-name">VIX</span>
-    <span class="index-val" id="vix-val">—</span>
-    <span class="index-chg" id="vix-chg">—</span>
-  </div>
-  <div class="index-item">
-    <span class="index-name">DXY</span>
-    <span class="index-val" id="dxy-val">—</span>
-    <span class="index-chg" id="dxy-chg">—</span>
-  </div>
-  <div class="index-item">
-    <span class="index-name">US 10Y</span>
-    <span class="index-val" id="us10y-val">—</span>
-    <span class="index-chg flat" id="us10y-sub">—</span>
-  </div>
-  <div class="index-item">
-    <span class="index-name">YIELD SPR</span>
-    <span class="index-val" id="spread-val">—</span>
-    <span class="index-chg" id="spread-sub">10Y-2Y</span>
-  </div>
-</div>
-
-<!-- ERROR BANNER -->
-<div class="error-banner" id="errorBanner"></div>
-
-<!-- ══════════════════════════════════════════════
-     MOBILE TABS
-══════════════════════════════════════════════ -->
-<div class="mobile-tabs" id="mobileTabs">
-  <button class="mobile-tab active" data-target="verdict" onclick="switchMobileTab('verdict')">🎯 AI 판단</button>
-  <button class="mobile-tab" data-target="market" onclick="switchMobileTab('market')">📊 시장</button>
-  <button class="mobile-tab" data-target="technical" onclick="switchMobileTab('technical')">📉 기술적</button>
-  <button class="mobile-tab" data-target="agents" onclick="switchMobileTab('agents')">🤖 에이전트</button>
-</div>
-
-<!-- ══════════════════════════════════════════════
-     VERDICT PANEL
-══════════════════════════════════════════════ -->
-<div class="verdict-panel mobile-section active" id="mobileVerdict">
-  <div class="verdict-header">
-    <span class="verdict-badge">🧠 AI Quartet Debate — 최종 판단</span>
-    <span class="verdict-meta" id="verdictDate">—</span>
-  </div>
-
-  <!-- Top row: stance + confidence + votes -->
-  <div class="verdict-top">
-    <div class="stance-card">
-      <div class="stance-weather" id="verdictWeatherIcon">⛅</div>
-      <div class="stance-info">
-        <div class="stance-label">FINAL STANCE</div>
-        <div class="stance-value" id="verdictStance">—</div>
-        <div class="stance-en" id="verdictStanceEn">Loading...</div>
-      </div>
-    </div>
-
-    <div class="confidence-block">
-      <div class="conf-label">CONFIDENCE</div>
-      <div class="conf-score" id="verdictConf">—</div>
-      <div class="conf-bar-track">
-        <div class="conf-bar-fill" id="verdictConfBar" style="width:0%"></div>
-      </div>
-      <div style="font-size:9px; color:var(--text-dim);">에이전트 신뢰도 평균</div>
-    </div>
-
-    <div class="votes-block">
-      <div class="votes-label">AGENT VOTES</div>
-      <div class="votes-grid" id="stanceVotes"></div>
-    </div>
-  </div>
-
-  <!-- Bottom: summary + insights + risks + actions -->
-  <div class="verdict-grid">
-    <div class="verdict-block">
-      <div class="vblock-title">📋 Market Summary</div>
-      <div class="vblock-text" id="verdictSummary">—</div>
-    </div>
-    <div class="verdict-block">
-      <div class="vblock-title green">💡 Key Insights</div>
-      <ul class="insight-list" id="verdictInsights"></ul>
-    </div>
-    <div class="verdict-block">
-      <div class="vblock-title red">⚠️ Risk Factors</div>
-      <ul class="insight-list risk-list" id="verdictRisks"></ul>
-    </div>
-  </div>
-
-  <!-- Action items -->
-  <div class="verdict-block" style="margin-top:10px;">
-    <div class="vblock-title blue">→ Action Items</div>
-    <ul class="insight-list action-list" id="verdictActions"></ul>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════
-     MAIN CONTENT (섹터차트 + 기술적 지표)
-══════════════════════════════════════════════ -->
-<div class="main-content">
-
-  <!-- LEFT: Sector Chart + Top Stocks -->
-  <div class="left-panel mobile-section" id="mobileMarket">
-    <div class="left-panel-header">
-      <div>
-        <div class="panel-title">🇺🇸 US MARKET</div>
-        <div class="panel-sub">S&amp;P 500 · NASDAQ 섹터 ETF / 주도주</div>
-      </div>
-      <div class="panel-sentiment" id="us-sentiment">—</div>
-    </div>
-
-    <div class="chart-section">
-      <div class="section-title">📈 섹터 ETF 등락률 (당일 %)</div>
-      <div class="chart-wrapper">
-        <canvas id="usSectorChart"></canvas>
-      </div>
-    </div>
-
-    <div class="stocks-section">
-      <div class="section-title">🔥 주도주 TOP</div>
-      <div class="stocks-table">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Ticker / Name</th>
-              <th>Sector</th>
-              <th class="num">Price</th>
-              <th class="num">Change</th>
-              <th class="num">Mkt Cap</th>
-              <th class="num">Vol↑</th>
-            </tr>
-          </thead>
-          <tbody id="usStockTable">
-            <tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:20px">로딩 중...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- RIGHT: Technical + Fed Watch + Rates + Valuation -->
-  <div class="right-panel mobile-section" id="mobileTechnical">
-
-    <!-- Technical Indicators -->
-    <div class="tech-section">
-      <div class="section-title">📉 기술적 지표</div>
-      <div class="tech-grid">
-        <!-- RSI -->
-        <div class="tech-card" style="grid-column: 1 / -1;">
-          <div class="tech-card-label">RSI (14)</div>
-          <div class="tech-card-val" id="rsiVal">—</div>
-          <div class="rsi-bar-wrap">
-            <div class="rsi-track">
-              <div class="rsi-needle" id="rsiNeedle" style="left:50%"></div>
-            </div>
-            <div class="rsi-labels">
-              <span>OVERSOLD 30</span>
-              <span>NEUTRAL 50</span>
-              <span>OVERBOUGHT 70</span>
-            </div>
-          </div>
-          <div class="tech-card-sub" id="rsiStatus">—</div>
-        </div>
-
-        <!-- MACD -->
-        <div class="tech-card">
-          <div class="tech-card-label">MACD</div>
-          <div class="tech-card-val" id="macdVal">—</div>
-          <div class="macd-sign" id="macdSign">—</div>
-          <div class="tech-card-sub" id="macdHist">Histogram: —</div>
-        </div>
-
-        <!-- BB Position -->
-        <div class="tech-card">
-          <div class="tech-card-label">BB Position</div>
-          <div class="tech-card-val" id="bbPosVal">—</div>
-          <div class="bb-track">
-            <div class="bb-needle" id="bbNeedle" style="left:50%"></div>
-          </div>
-          <div class="tech-card-sub" id="bbStatus">—</div>
-        </div>
-
-        <!-- MA Status -->
-        <div class="ma-status">
-          <div class="tech-card-label">이동평균선 대비 위치</div>
-          <div class="ma-row" id="maRow">—</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Fed Watch -->
-    <div class="fed-section">
-      <div class="section-title">🏛️ Fed Watch — 금리 방향</div>
-      <div class="fed-bars">
-        <div class="fed-bar-row">
-          <span class="fed-bar-label">동결 HOLD</span>
-          <div class="fed-bar-track">
-            <div class="fed-bar-fill hold" id="fedHold" style="width:0%">—</div>
-          </div>
-        </div>
-        <div class="fed-bar-row">
-          <span class="fed-bar-label">인하 CUT</span>
-          <div class="fed-bar-track">
-            <div class="fed-bar-fill cut" id="fedCut" style="width:0%">—</div>
-          </div>
-        </div>
-        <div class="fed-bar-row">
-          <span class="fed-bar-label">인상 HIKE</span>
-          <div class="fed-bar-track">
-            <div class="fed-bar-fill hike" id="fedHike" style="width:0%">—</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Rates -->
-    <div class="rates-section">
-      <div class="section-title">📊 금리 / 환율</div>
-      <div class="rates-grid">
-        <div class="rate-chip">
-          <div class="rate-label">US 10Y</div>
-          <div class="rate-val" id="r-10y">—</div>
-          <div class="rate-sub">국채 10년</div>
-        </div>
-        <div class="rate-chip">
-          <div class="rate-label">US 2Y</div>
-          <div class="rate-val" id="r-2y">—</div>
-          <div class="rate-sub">국채 2년</div>
-        </div>
-        <div class="rate-chip">
-          <div class="rate-label">10Y-2Y</div>
-          <div class="rate-val" id="r-spread">—</div>
-          <div class="rate-sub">장단기 스프레드</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Earnings / Valuation -->
-    <div class="earnings-section">
-      <div class="section-title">💰 실적 / 밸류에이션</div>
-      <div class="earn-grid">
-        <div class="earn-chip">
-          <div class="earn-label">EPS 성장률</div>
-          <div class="earn-val" id="epsGrowth">—</div>
-        </div>
-        <div class="earn-chip">
-          <div class="earn-label">어닝 비트율</div>
-          <div class="earn-val" id="beatRate">—</div>
-        </div>
-        <div class="earn-chip">
-          <div class="earn-label">배당수익률</div>
-          <div class="earn-val" id="divYield">—</div>
-        </div>
-        <div class="earn-chip">
-          <div class="earn-label">가이던스 추세</div>
-          <div class="earn-val" id="guidanceTrend" style="font-size:12px">—</div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /right-panel -->
-</div><!-- /main-content -->
-
-<!-- ══════════════════════════════════════════════
-     AGENT DEBATE SECTION
-══════════════════════════════════════════════ -->
-<div class="debate-section mobile-section" id="mobileAgents">
-  <div class="debate-header">
-    <span class="debate-badge">🤖 AI Quartet — Phase 1 독립 분석</span>
-    <span class="debate-sub">4개 에이전트 독립 분석 · Phase 2 교차 반론 포함</span>
-  </div>
-
-  <!-- Phase 1: Agent Cards -->
-  <div class="agents-grid" id="agentsGrid">
-    <!-- populated by JS -->
-  </div>
-
-  <!-- Phase 2: Cross Critiques -->
-  <div class="critique-section">
-    <div class="critique-header-row">
-      <span class="critique-badge">⚔️ Phase 2 — 교차 반론</span>
-    </div>
-    <div class="critiques-grid" id="critiquesGrid">
-      <!-- populated by JS -->
-    </div>
-  </div>
-</div>
-
-<script>
-// ════════════════════════════════════════════════
-//  Config
-// ════════════════════════════════════════════════
-const REFRESH_MS = 60 * 60 * 1000; // 1시간
-
-const AGENT_META = {
-  TechMo:     { cls: 'tech-mo',     color: '#60a5fa', name: 'TechMomentum',     label: '📊',  role: '기술적 모멘텀 분석가' },
-  MacroFed:   { cls: 'macro-fed',   color: '#a78bfa', name: 'MacroFed',         label: '🏛️', role: '거시경제·Fed 분석가' },
-  SectorRot:  { cls: 'sector-rot',  color: '#34d399', name: 'SectorRot',        label: '🔄',  role: '섹터 로테이션 분석가' },
-  ValueFund:  { cls: 'value-fund',  color: '#fbbf24', name: 'ValueFund',        label: '💎',  role: '가치투자·펀더멘털 분석가' },
-  GlobalNews: { cls: 'global-news', color: '#f472b6', name: '글로벌 이벤트 헌터', label: '📡', role: '이벤트 드리븐 글로벌 매크로 리스크 분석가' }
-};
-
-// agent_name 매핑 (데이터 내 이름 → key)
-function detectAgentKey(name) {
-  const n = (name || '').toLowerCase();
-  if (n.includes('글로벌') || n.includes('헌터') || n.includes('news') || n.includes('event')) return 'GlobalNews';
-  if (n.includes('tech'))   return 'TechMo';
-  if (n.includes('macro') || n.includes('fed')) return 'MacroFed';
-  if (n.includes('sector') || n.includes('rot')) return 'SectorRot';
-  if (n.includes('value') || n.includes('fund')) return 'ValueFund';
-  return 'TechMo';
-}
-
-// ════════════════════════════════════════════════
-//  Data Loading — daily_report.json 우선, history 폴백
-//  (docs/ 폴더 기준: pipeline이 docs/data/daily_report.json에 저장)
-// ════════════════════════════════════════════════
-async function loadLatestData() {
-  const t = Date.now();
-
-  // 1차: docs/data/daily_report.json (파이프라인 기본 저장 경로)
-  try {
-    const res = await fetch(`./data/daily_report.json?t=${t}`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.date) return data;
-    }
-  } catch (_) {}
-
-  // 2차: data/history/ 날짜 폴백 (최근 7일)
-  const today = new Date();
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().slice(0, 10);
-    try {
-      const res = await fetch(`../data/history/${dateStr}.json?t=${t}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.date) return data;
-      }
-    } catch (_) {}
-  }
-  throw new Error('데이터 파일을 찾을 수 없습니다. (daily_report.json + 최근 7일 history 모두 실패)');
-}
-
-// ════════════════════════════════════════════════
-//  Helpers
-// ════════════════════════════════════════════════
-function fmtChg(v) {
-  if (v === null || v === undefined) return { text: '—', cls: 'flat' };
-  const n = parseFloat(v);
-  if (isNaN(n)) return { text: '—', cls: 'flat' };
-  const sign = n >= 0 ? '+' : '';
-  return { text: `${sign}${n.toFixed(2)}%`, cls: n > 0 ? 'up' : n < 0 ? 'down' : 'flat' };
-}
-
-function fmtNum(v, dec = 2) {
-  if (v === null || v === undefined) return '—';
-  return parseFloat(v).toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
-}
-
-function fmtMcap(v) {
-  if (!v) return '—';
-  if (v >= 1000) return `$${(v / 1000).toFixed(1)}T`;
-  return `$${v.toFixed(0)}B`;
-}
-
-function fmtVolSurge(v) {
-  if (!v) return '—';
-  const sign = v >= 0 ? '+' : '';
-  return `${sign}${v.toFixed(1)}%`;
-}
-
-function setIdx(idVal, idChg, val, chg, dec = 2) {
-  const ve = document.getElementById(idVal);
-  const ce = document.getElementById(idChg);
-  if (!ve || !ce) return;
-  ve.textContent = fmtNum(val, dec);
-  const { text, cls } = fmtChg(chg);
-  ce.textContent = text;
-  ce.className = 'index-chg ' + cls;
-}
-
-function setText(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = val ?? '—';
-}
-
-function stripJsonFence(str) {
-  if (!str) return str;
-  return str.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/, '').trim();
-}
-
-// ════════════════════════════════════════════════
-//  Sector Chart
-// ════════════════════════════════════════════════
-function buildSectorChart(canvasId, sectorsObj) {
-  const ctx = document.getElementById(canvasId);
-  if (!ctx) return;
-  if (Chart.getChart(canvasId)) Chart.getChart(canvasId).destroy();
-
-  const entries = Object.entries(sectorsObj)
-    .map(([key, v]) => ({ label: key.split('(')[0].trim(), val: parseFloat(v.change_pct) }))
-    .sort((a, b) => b.val - a.val);
-
-  const bgColors = entries.map(d =>
-    d.val > 0 ? 'rgba(0,230,118,0.75)' :
-    d.val < 0 ? 'rgba(255,23,68,0.75)' : 'rgba(90,122,154,0.5)'
-  );
-  const borderColors = entries.map(d =>
-    d.val > 0 ? '#00e676' : d.val < 0 ? '#ff1744' : '#5a7a9a'
-  );
-
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: entries.map(d => d.label),
-      datasets: [{
-        data: entries.map(d => d.val),
-        backgroundColor: bgColors,
-        borderColor: borderColors,
-        borderWidth: 1,
-        borderRadius: 3,
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: { duration: 700, easing: 'easeOutQuart' },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#0d1526',
-          borderColor: '#ff8c42',
-          borderWidth: 1,
-          titleColor: '#ff8c42',
-          bodyColor: '#c0d8f0',
-          callbacks: { label: c => ` ${c.parsed.x >= 0 ? '+' : ''}${c.parsed.x.toFixed(2)}%` }
-        }
-      },
-      scales: {
-        x: {
-          grid: { color: 'rgba(30,48,80,0.5)' },
-          ticks: { color: '#5a7a9a', font: { size: 10 },
-            callback: v => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%` },
-          border: { display: false }
+    // ─── 샘플 데이터 ─────────────────────────────────
+    const SAMPLE = {
+      date: "2026-03-01",
+      generated_at: "2026-03-01T16:30:00",
+      market_data: {
+        sp500:  { close: 5814.0, change_pct: 0.54 },
+        nasdaq: { close: 18420.5, change_pct: 0.92 },
+        djia:   { close: 43250.0, change_pct: 0.31 },
+        russell: { close: 2085.3, change_pct: -0.18 },
+        vix:    { close: 16.8, change_pct: -3.2 },
+        dxy:    { close: 104.2, change_pct: 0.15 },
+        rates: { us10y: 4.32, us2y: 4.68, yield_spread: -0.36 },
+        fed_watch: { hold_prob: 62, cut_prob: 35, hike_prob: 3 },
+        technical_indicators: {
+          rsi: 58.4, macd: 42.3, signal: 38.1, histogram: 4.2,
+          bb_position: 0.72,
+          ma5_diff_pct: 0.8, ma20_diff_pct: 2.1, ma60_diff_pct: 4.5
         },
-        y: {
-          grid: { display: false },
-          ticks: { color: '#a0c0e0', font: { size: 10 }, padding: 4 },
-          border: { display: false }
+        sectors: {
+          "Technology (XLK)": { change_pct: 1.2 },
+          "Healthcare (XLV)": { change_pct: 0.5 },
+          "Financials (XLF)": { change_pct: 0.3 },
+          "Consumer Disc (XLY)": { change_pct: -0.4 },
+          "Energy (XLE)": { change_pct: -0.8 },
+          "Industrials (XLI)": { change_pct: 0.6 },
+          "Communication (XLC)": { change_pct: 0.9 },
+          "Utilities (XLU)": { change_pct: -0.2 },
+          "Real Estate (XLRE)": { change_pct: -0.6 },
+          "Materials (XLB)": { change_pct: 0.1 },
+          "Staples (XLP)": { change_pct: 0.2 },
+        },
+        top_stocks: [
+          { ticker:"NVDA", name:"NVIDIA",       close:880.5,  change_pct:3.2, sector:"Tech", market_cap_b:2160, volume_change_pct:45 },
+          { ticker:"AAPL", name:"Apple",         close:178.3,  change_pct:1.1, sector:"Tech", market_cap_b:2780, volume_change_pct:12 },
+          { ticker:"MSFT", name:"Microsoft",     close:415.8,  change_pct:0.9, sector:"Tech", market_cap_b:3100, volume_change_pct:8 },
+          { ticker:"META", name:"Meta Platforms", close:502.1, change_pct:1.5, sector:"Tech", market_cap_b:1280, volume_change_pct:22 },
+          { ticker:"AMZN", name:"Amazon",        close:178.9,  change_pct:0.7, sector:"Consumer", market_cap_b:1860, volume_change_pct:10 },
+          { ticker:"TSLA", name:"Tesla",         close:198.4,  change_pct:-1.8, sector:"Consumer", market_cap_b:630, volume_change_pct:38 },
+          { ticker:"GOOGL",name:"Alphabet",      close:147.2,  change_pct:0.6, sector:"Tech", market_cap_b:1840, volume_change_pct:9 },
+          { ticker:"JPM",  name:"JPMorgan Chase", close:198.5, change_pct:0.4, sector:"Finance", market_cap_b:572, volume_change_pct:5 },
+        ],
+        earnings: { eps_growth: 8.5, beat_rate: "78%", guidance_trend: "positive" },
+        valuation: { sp500_div_yield: 1.32 },
+      },
+      debate: {
+        phase1_reports: [
+          { agent_name:"TechMomentum", role:"기술적 모멘텀 분석가", avatar:"📊", stance:"BUY", confidence_score:76,
+            analysis:"S&P 500 RSI 58.4로 과매수 구간 진입 전 안정적 위치를 유지하며 상승 모멘텀이 강합니다. MACD 히스토그램 +4.2로 강세 확대 중이며, 나스닥이 0.92% 상승하며 기술주 주도의 랠리가 이어지고 있습니다. 볼린저밴드 72% 위치로 추가 상승 여력이 남아 있습니다.",
+            key_points:["RSI 58.4 — 과매수 진입 전 안정적 상승 모멘텀","MACD 히스토그램 +4.2 강세 확대","볼린저밴드 72%, 추가 상승 여력 존재"] },
+          { agent_name:"MacroFed", role:"거시경제·Fed 분석가", avatar:"🏛️", stance:"HOLD", confidence_score:64,
+            analysis:"Fed의 금리 동결 확률 62%로 시장의 완화 기대가 약화되고 있습니다. 10Y-2Y 스프레드 역전(-0.36%)이 지속되어 경기 침체 시그널이 유효합니다. 달러 인덱스 104.2로 강달러 기조가 이머징 마켓과 수출 기업에 부담을 줄 수 있습니다.",
+            key_points:["Fed 동결 확률 62%, 금리인하 기대 약화","장단기 스프레드 역전 -0.36% — 경기침체 시그널","DXY 104.2, 강달러 지속에 따른 EM 리스크"] },
+          { agent_name:"SectorRotation", role:"섹터 로테이션 분석가", avatar:"🔄", stance:"BUY", confidence_score:79,
+            analysis:"기술 섹터(XLK +1.2%)와 통신 섹터(XLC +0.9%)가 시장을 주도하고 있으며, NVIDIA +3.2%의 AI 랠리가 핵심 동력입니다. 에너지(XLE -0.8%)와 부동산(XLRE -0.6%) 등 금리 민감 섹터는 약세이나, 성장주 중심의 로테이션이 명확합니다.",
+            key_points:["Tech XLK +1.2% 주도, AI 테마 핵심","에너지·부동산 금리 민감 섹터 약세","성장주 → 가치주 로테이션 아직 미발생"] },
+          { agent_name:"ValueFundamental", role:"가치투자·펀더멘털 분석가", avatar:"💎", stance:"HOLD", confidence_score:58,
+            analysis:"S&P 500 Forward P/E 21.5배로 역사적 평균 대비 고평가 구간입니다. EPS 성장률 8.5%는 견조하나, 어닝 비트율 78%는 전 분기 대비 하락 추세입니다. 배당수익률 1.32%로 채권 대비 매력도가 낮아 밸류에이션 부담이 존재합니다.",
+            key_points:["Forward P/E 21.5배 — 역사적 고평가","어닝 비트율 78% 전 분기 대비 하락","배당수익률 1.32%, 채권 대비 매력 부족"] },
+          { agent_name:"글로벌 이벤트 헌터", role:"이벤트 드리븐 글로벌 리스크 분석가", avatar:"📡", stance:"HOLD", confidence_score:55,
+            analysis:"중동 지정학적 리스크가 에너지 가격 변동성을 높이고 있으며, 중국 경기 부양책의 효과가 제한적입니다. 유럽 ECB의 금리 인하 시그널이 글로벌 유동성 환경에 긍정적이나, 미·중 기술 제재 확대 가능성이 반도체 섹터에 불확실성을 더하고 있습니다.",
+            key_points:["중동 지정학 리스크 — 에너지 변동성 확대","ECB 금리인하 시그널 — 글로벌 유동성 개선","미·중 기술 제재 확대 가능성 — 반도체 불확실성"] },
+        ],
+        phase2_critiques: [
+          { from_agent:"TechMomentum", to_agent:"ValueFundamental", critique:"Forward P/E 고평가 논거는 정태적 분석입니다. AI 혁명에 의한 실적 성장 재평가를 고려하면 현재 밸류에이션은 정당화 가능합니다. 기술적 모멘텀이 살아있는 상황에서 밸류에이션만으로 시장 방향을 판단하는 것은 수익 기회를 놓칠 수 있습니다." },
+          { from_agent:"MacroFed", to_agent:"SectorRotation", critique:"Tech 섹터 낙관론은 Fed의 고금리 장기화 시나리오를 과소평가하고 있습니다. 10Y 4.32% 환경에서 성장주 PER 확장 여력이 제한되며, VIX 16.8의 낮은 변동성은 자만의 신호일 수 있습니다." },
+          { from_agent:"SectorRotation", to_agent:"MacroFed", critique:"매크로 불확실성을 이유로 섹터 강세를 무시하는 것은 bottom-up 증거를 간과하는 것입니다. NVIDIA +3.2%, AI 인프라 투자 확대는 금리 환경과 무관하게 구조적 성장을 보여주고 있습니다." },
+          { from_agent:"ValueFundamental", to_agent:"TechMomentum", critique:"기술적 모멘텀의 지속성에 대한 과신이 우려됩니다. 역사적으로 RSI 60 이상에서의 추가 상승은 제한적이었으며, 어닝 비트율 하락 추세는 실적 피크아웃의 초기 시그널일 수 있습니다." },
+        ],
+      },
+      verdict: {
+        today_moderator_agent: "TechMomentum",
+        final_stance: "HOLD",
+        confidence_score: 65,
+        summary: "5인 에이전트 토론 결과, 기술적 모멘텀(TechMo)과 섹터 로테이션(SectorRot)이 매수 의견을 제시했으나, 매크로 리스크(MacroFed), 밸류에이션 부담(ValueFund), 지정학적 불확실성(글로벌 헌터)이 균형을 이루며 HOLD 판정이 우세합니다. AI 테마 강세에도 불구하고 Fed 금리 경로 불확실성과 장단기 스프레드 역전이 경계 요인입니다.",
+        market_weather_icon: "⛅",
+        market_weather_en: "Cautious Hold — Mixed Signals",
+        key_insights: ["AI 주도 Tech 랠리 지속, NVIDIA +3.2% 핵심","Fed 동결 확률 62%, 금리인하 기대 약화","장단기 스프레드 역전 경기침체 시그널 유효"],
+        risk_factors: ["Fed 고금리 장기화","밸류에이션 고평가 부담","중동 지정학 에너지 리스크","미·중 기술 제재 확대"],
+        action_items: ["Tech 비중 유지하되 분할 익절 준비","VIX 20 돌파 시 방어적 포지션 전환","에너지 섹터 변동성 확대 대비 헤지"],
+        stance_votes: { "TechMomentum":"BUY", "MacroFed":"HOLD", "SectorRotation":"BUY", "ValueFundamental":"HOLD", "글로벌 이벤트 헌터":"HOLD" },
+        top_sectors: ["Technology (AI/Semiconductor)", "Communication Services", "Industrials"],
+      },
+      backtest: {
+        agent_rankings: [
+          { name:"SectorRotation", avatar:"🔄", hit_rate:0.70, total_predictions:20, correct:14 },
+          { name:"TechMomentum",   avatar:"📊", hit_rate:0.65, total_predictions:20, correct:13 },
+          { name:"MacroFed",       avatar:"🏛️", hit_rate:0.60, total_predictions:20, correct:12 },
+          { name:"ValueFundamental",avatar:"💎", hit_rate:0.55, total_predictions:20, correct:11 },
+          { name:"글로벌 이벤트 헌터",avatar:"📡", hit_rate:0.50, total_predictions:20, correct:10 },
+        ],
+        yesterday_comparison: {
+          date: "2026-02-28",
+          actual_movement: "UP",
+          predictions: [
+            { agent:"TechMomentum",   avatar:"📊", prediction:"BUY",  was_correct:true },
+            { agent:"MacroFed",       avatar:"🏛️", prediction:"HOLD", was_correct:false },
+            { agent:"SectorRotation", avatar:"🔄", prediction:"BUY",  was_correct:true },
+            { agent:"ValueFundamental",avatar:"💎", prediction:"HOLD", was_correct:false },
+            { agent:"글로벌 이벤트 헌터",avatar:"📡", prediction:"HOLD", was_correct:false },
+          ],
+        },
+      },
+    };
+
+    // ─── 유틸 ──────────────────────────────────────────
+    const pct = (v) => {
+      if (v === null || v === undefined) return '—';
+      return v >= 0 ? `+${parseFloat(v).toFixed(2)}%` : `${parseFloat(v).toFixed(2)}%`;
+    };
+    const stanceColor = { BUY:"text-green-400", HOLD:"text-yellow-400", SELL:"text-red-400" };
+    const stanceBg    = { BUY:"tag-buy",        HOLD:"tag-hold",        SELL:"tag-sell" };
+    const stanceGlow  = { BUY:"glow-buy",       HOLD:"glow-hold",       SELL:"glow-sell" };
+
+    const AGENT_COLORS = {
+      TechMomentum:  { border:"border-blue-400", dot:"bg-blue-400", badge:"bg-blue-400/20 text-blue-300" },
+      MacroFed:      { border:"border-purple-400", dot:"bg-purple-400", badge:"bg-purple-400/20 text-purple-300" },
+      SectorRotation:{ border:"border-emerald-400", dot:"bg-emerald-400", badge:"bg-emerald-400/20 text-emerald-300" },
+      ValueFundamental:{ border:"border-amber-400", dot:"bg-amber-400", badge:"bg-amber-400/20 text-amber-300" },
+      GlobalNews:    { border:"border-pink-400", dot:"bg-pink-400", badge:"bg-pink-400/20 text-pink-300" },
+    };
+
+    function detectAgentKey(name) {
+      const n = (name || '').toLowerCase();
+      if (n.includes('글로벌') || n.includes('헌터') || n.includes('news') || n.includes('event')) return 'GlobalNews';
+      if (n.includes('tech'))   return 'TechMomentum';
+      if (n.includes('macro') || n.includes('fed')) return 'MacroFed';
+      if (n.includes('sector') || n.includes('rot')) return 'SectorRotation';
+      if (n.includes('value') || n.includes('fund')) return 'ValueFundamental';
+      return 'TechMomentum';
+    }
+
+    function getAgentColor(name) {
+      return AGENT_COLORS[detectAgentKey(name)] || AGENT_COLORS.TechMomentum;
+    }
+
+    function stripJsonFence(str) {
+      if (!str) return str;
+      return str.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/, '').trim();
+    }
+
+    function extractCritiqueText(raw) {
+      let text = raw || '';
+      text = stripJsonFence(text);
+      try {
+        const obj = JSON.parse(text);
+        return obj.counter_argument || obj.critique || obj.rebuttal?.critique || obj['반론_요약'] || obj.결론 || obj.counter || text;
+      } catch (_) {}
+      return text.replace(/[{}"\\]/g, '').replace(/\n+/g, ' ').trim();
+    }
+
+    // ─── 컴포넌트 ──────────────────────────────────────
+
+    function Header({ date, generatedAt }) {
+      const d = new Date(generatedAt);
+      const timeStr = isNaN(d) ? "" : d.toLocaleTimeString("ko-KR", { hour:"2-digit", minute:"2-digit" });
+      return (
+        <div className="header-gradient border-b border-slate-800 px-4 sm:px-6 py-4 sm:py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="text-3xl">🇺🇸</div>
+            <div>
+              <h1 className="text-lg sm:text-xl font-black tracking-tight text-white">
+                US Market Agent <span className="us-accent us-glow text-sm font-bold ml-1">LIVE</span>
+              </h1>
+              <p className="text-xs text-slate-400 mono tracking-wider">QUINTET MULTI-AGENT DEBATE SYSTEM</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-sm font-semibold text-slate-200">{date}</div>
+            {timeStr && <div className="text-xs text-slate-500">생성 {timeStr}</div>}
+          </div>
+        </div>
+      );
+    }
+
+    function IndexBar({ data }) {
+      const items = [
+        { label:"S&P 500",  val: data.sp500?.close,  chg: data.sp500?.change_pct },
+        { label:"NASDAQ",   val: data.nasdaq?.close,  chg: data.nasdaq?.change_pct },
+        { label:"DOW",      val: data.djia?.close,    chg: data.djia?.change_pct, dec:0 },
+        { label:"RUSSELL",  val: data.russell?.close,  chg: data.russell?.change_pct },
+        { label:"VIX",      val: data.vix?.close,     chg: data.vix?.change_pct },
+        { label:"DXY",      val: data.dxy?.close,     chg: data.dxy?.change_pct },
+        { label:"US 10Y",   val: data.rates?.us10y ? data.rates.us10y+"%" : null, chg: null, isBond: true },
+        { label:"SPREAD",   val: data.rates?.yield_spread, chg: null, isSpread: true },
+      ];
+
+      return (
+        <div className="grid grid-cols-4 md:grid-cols-8 bg-slate-900/50 border-b border-slate-800">
+          {items.map((item, i) => {
+            const up = item.chg > 0;
+            const dn = item.chg < 0;
+            let displayVal = '—';
+            if (item.isBond) displayVal = item.val || '—';
+            else if (item.isSpread) displayVal = item.val !== undefined ? (item.val >= 0 ? '+' : '') + parseFloat(item.val).toFixed(2) + '%' : '—';
+            else displayVal = item.val ? parseFloat(item.val).toLocaleString('en-US', {minimumFractionDigits: item.dec ?? 2, maximumFractionDigits: item.dec ?? 2}) : '—';
+
+            return (
+              <div key={i} className="px-2 sm:px-3 py-2 border-r border-b md:border-b-0 border-slate-800/60 last:border-r-0">
+                <div className="text-[8px] sm:text-[9px] text-slate-500 tracking-wider uppercase mb-0.5">{item.label}</div>
+                <div className="text-xs sm:text-sm font-bold mono text-white">{displayVal}</div>
+                {item.chg !== null && item.chg !== undefined && (
+                  <div className={`text-[10px] font-semibold ${up ? "text-green-400" : dn ? "text-red-400" : "text-slate-400"}`}>
+                    {pct(item.chg)}
+                  </div>
+                )}
+                {item.isSpread && (
+                  <div className="text-[9px] text-slate-500">10Y-2Y</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    function WeatherCard({ verdict }) {
+      if (!verdict) return null;
+      const { market_weather_icon: icon, market_weather_en: label,
+              final_stance: stance, confidence_score: conf, summary } = verdict;
+      const colors = {
+        BUY:  "from-green-900/40 to-green-800/20 border-green-700/40",
+        HOLD: "from-amber-900/30 to-orange-900/20 border-orange-700/30",
+        SELL: "from-red-900/40 to-red-800/20 border-red-700/40",
+      };
+      return (
+        <div className={`rounded-2xl p-4 sm:p-6 border bg-gradient-to-br ${colors[stance] || colors.HOLD} mb-4 sm:mb-6`}>
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
+            <div className="text-center md:text-left flex-shrink-0">
+              <div className="text-5xl sm:text-6xl mb-2">{icon || "⛅"}</div>
+              <div className="text-sm sm:text-lg font-bold text-white">{label || "Loading..."}</div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 mb-3 flex-wrap">
+                <span className={`px-3 py-1 rounded-full text-sm font-bold ${stanceBg[stance]}`}>{stance}</span>
+                <span className="text-slate-300 text-sm">확신도</span>
+                <div className="flex-1 bg-slate-700/50 rounded-full h-2 max-w-32 min-w-16">
+                  <div className={`h-2 rounded-full progress-bar ${stance==="BUY"?"bg-green-500":stance==="SELL"?"bg-red-500":"bg-amber-500"}`}
+                    style={{ width:`${conf}%` }} />
+                </div>
+                <span className="mono text-sm font-bold text-white">{conf}%</span>
+              </div>
+              <p className="text-sm text-slate-300 leading-relaxed">{summary}</p>
+
+              {/* Agent Votes */}
+              {verdict.stance_votes && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {Object.entries(verdict.stance_votes).map(([agent, vstance]) => (
+                    <span key={agent} className={`text-xs px-2 py-0.5 rounded ${stanceBg[vstance]}`}>
+                      {agent.length > 12 ? agent.slice(0,10)+"…" : agent}: {vstance}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function VerdictDetails({ verdict }) {
+      if (!verdict) return null;
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 sm:mb-6">
+          <div className="card-gradient rounded-xl p-4 border border-slate-700/50">
+            <h4 className="text-xs font-bold text-green-400 tracking-wider uppercase mb-2">💡 Key Insights</h4>
+            <div className="space-y-1">
+              {(verdict.key_insights || []).map((item, i) => (
+                <div key={i} className="flex items-start gap-2 text-xs text-slate-300">
+                  <span className="us-accent mt-0.5">▸</span><span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="card-gradient rounded-xl p-4 border border-slate-700/50">
+            <h4 className="text-xs font-bold text-red-400 tracking-wider uppercase mb-2">⚠️ Risk Factors</h4>
+            <div className="space-y-1">
+              {(verdict.risk_factors || []).map((item, i) => (
+                <div key={i} className="flex items-start gap-2 text-xs text-slate-300">
+                  <span className="text-red-400 mt-0.5">⚠</span><span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="card-gradient rounded-xl p-4 border border-slate-700/50">
+            <h4 className="text-xs font-bold text-blue-400 tracking-wider uppercase mb-2">→ Action Items</h4>
+            <div className="space-y-1">
+              {(verdict.action_items || []).map((item, i) => (
+                <div key={i} className="flex items-start gap-2 text-xs text-slate-300">
+                  <span className="text-blue-400 mt-0.5">→</span><span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function TechnicalIndicators({ ti }) {
+      if (!ti) return null;
+      const rsi = parseFloat(ti.rsi || 50);
+      const rsiColor = rsi > 70 ? "text-red-400" : rsi < 30 ? "text-green-400" : "text-blue-300";
+      const macd = parseFloat(ti.macd || 0);
+      const hist = parseFloat(ti.histogram || 0);
+      const macdColor = hist > 0 ? "text-green-400" : "text-red-400";
+      const bbPos = parseFloat(ti.bb_position || 0.5);
+
+      const mas = [
+        { name:"MA5", diff: ti.ma5_diff_pct },
+        { name:"MA20", diff: ti.ma20_diff_pct },
+        { name:"MA60", diff: ti.ma60_diff_pct },
+      ].filter(m => m.diff !== undefined);
+
+      return (
+        <div className="card-gradient rounded-xl p-4 border border-slate-700/50 mb-4 sm:mb-6">
+          <h3 className="text-sm font-bold text-slate-300 mb-3">📉 기술적 지표 (S&P 500)</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-3 text-center">
+            <div className="bg-slate-800/50 rounded-lg p-2 sm:p-3 col-span-2 sm:col-span-1">
+              <div className="text-[10px] text-slate-500 mb-1">RSI(14)</div>
+              <div className={`text-lg font-bold mono ${rsiColor}`}>{rsi.toFixed(1)}</div>
+              <div className="mt-1 h-1.5 bg-gradient-to-r from-red-500/40 via-yellow-500/40 to-red-500/40 rounded-full relative">
+                <div className="absolute top-[-2px] w-1 h-2.5 bg-orange-400 rounded-sm" style={{left:`${rsi}%`, transform:'translateX(-50%)'}} />
+              </div>
+            </div>
+            <div className="bg-slate-800/50 rounded-lg p-2 sm:p-3">
+              <div className="text-[10px] text-slate-500 mb-1">MACD</div>
+              <div className={`text-sm font-bold mono ${macdColor}`}>{macd.toFixed(2)}</div>
+              <div className="text-[10px] text-slate-500 mt-1">Hist: <span className={macdColor}>{hist >= 0 ? '+' : ''}{hist.toFixed(2)}</span></div>
+            </div>
+            <div className="bg-slate-800/50 rounded-lg p-2 sm:p-3">
+              <div className="text-[10px] text-slate-500 mb-1">BB Position</div>
+              <div className="text-sm font-bold mono text-purple-400">{(bbPos*100).toFixed(0)}%</div>
+              <div className="mt-1 h-1.5 bg-slate-700/60 rounded-full relative">
+                <div className="absolute top-[-2px] w-1 h-2.5 bg-blue-400 rounded-sm" style={{left:`${bbPos*100}%`, transform:'translateX(-50%)'}} />
+              </div>
+            </div>
+            {mas.map(m => {
+              const d = parseFloat(m.diff);
+              return (
+                <div key={m.name} className="bg-slate-800/50 rounded-lg p-2 sm:p-3">
+                  <div className="text-[10px] text-slate-500 mb-1">{m.name}</div>
+                  <div className={`text-sm font-bold mono ${d >= 0 ? "text-green-400" : "text-red-400"}`}>
+                    {d >= 0 ? '+' : ''}{d.toFixed(2)}%
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    function FedWatch({ fedWatch }) {
+      if (!fedWatch) return null;
+      const bars = [
+        { label:"동결 HOLD", val: fedWatch.hold_prob || 0, color:"bg-gradient-to-r from-slate-600 to-yellow-500" },
+        { label:"인하 CUT",  val: fedWatch.cut_prob || 0,  color:"bg-gradient-to-r from-slate-600 to-green-500" },
+        { label:"인상 HIKE", val: fedWatch.hike_prob || 0, color:"bg-gradient-to-r from-slate-600 to-red-500" },
+      ];
+      return (
+        <div className="card-gradient rounded-xl p-4 border border-slate-700/50 mb-4 sm:mb-6">
+          <h3 className="text-sm font-bold text-slate-300 mb-3">🏛️ Fed Watch — 금리 방향</h3>
+          <div className="space-y-3">
+            {bars.map(b => (
+              <div key={b.label} className="flex items-center gap-3">
+                <span className="text-xs text-slate-400 w-16 sm:w-20 flex-shrink-0">{b.label}</span>
+                <div className="flex-1 bg-slate-700/50 rounded-full h-4 sm:h-5 overflow-hidden">
+                  <div className={`h-full rounded-full ${b.color} progress-bar flex items-center justify-end pr-2`}
+                    style={{ width:`${b.val}%` }}>
+                    {b.val >= 15 && <span className="text-[9px] font-bold text-white">{b.val}%</span>}
+                  </div>
+                </div>
+                {b.val < 15 && <span className="text-xs mono text-slate-400">{b.val}%</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function AgentStanceCards({ reports }) {
+      return (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 mb-4 sm:mb-6">
+          {(reports || []).map(r => {
+            const ac = getAgentColor(r.agent_name);
+            return (
+              <div key={r.agent_name} className={`card-gradient rounded-xl p-3 sm:p-4 border border-slate-700/50 ${stanceGlow[r.stance]} border-t-2 ${ac.border}`}>
+                <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">{r.avatar}</div>
+                <div className="text-xs sm:text-sm font-bold text-white truncate">{r.agent_name}</div>
+                <div className="text-[10px] text-slate-400 mb-2 truncate">{r.role}</div>
+                <div className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${stanceBg[r.stance]}`}>{r.stance}</div>
+                <div className="mt-2">
+                  <div className="flex items-center gap-1">
+                    <div className="flex-1 bg-slate-700/50 rounded-full h-1.5">
+                      <div className={`h-1.5 rounded-full progress-bar ${r.stance==="BUY"?"bg-green-500":r.stance==="SELL"?"bg-red-500":"bg-amber-500"}`}
+                        style={{ width:`${r.confidence_score}%` }} />
+                    </div>
+                    <span className="text-[10px] mono text-slate-400">{r.confidence_score}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    function SectorHeatmap({ sectors, topSectors, topStocks }) {
+      const sectorEntries = sectors ? Object.entries(sectors).sort((a,b) => b[1].change_pct - a[1].change_pct) : [];
+
+      return (
+        <div className="card-gradient rounded-xl border border-slate-700/50 mb-4 sm:mb-6">
+          <div className="p-4 border-b border-slate-700/50 flex items-center gap-2">
+            <span className="text-lg">🔥</span>
+            <h3 className="font-bold text-white">섹터 & 종목 현황</h3>
+          </div>
+          <div className="p-3 sm:p-4">
+            {/* Top Sectors */}
+            {topSectors && (
+              <div className="mb-4">
+                <div className="text-xs text-slate-400 mb-2">✨ 주목 섹터 (Moderator 선정)</div>
+                <div className="flex flex-wrap gap-2">
+                  {topSectors.map((s, i) => (
+                    <span key={i} className={`px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold
+                      ${i===0?"bg-green-500/20 text-green-300 border border-green-500/40":
+                        i===1?"bg-blue-500/20 text-blue-300 border border-blue-500/40":
+                               "bg-purple-500/20 text-purple-300 border border-purple-500/40"}`}>
+                      {i===0?"🥇":i===1?"🥈":"🥉"} {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Sector Performance Bars */}
+            {sectorEntries.length > 0 && (
+              <div className="mb-4 space-y-1">
+                <div className="text-xs text-slate-400 mb-2">📈 섹터 ETF 등락률 (당일)</div>
+                {sectorEntries.map(([name, data]) => {
+                  const v = parseFloat(data.change_pct);
+                  const w = Math.min(Math.abs(v) * 20, 100);
+                  const up = v >= 0;
+                  return (
+                    <div key={name} className="flex items-center gap-2">
+                      <span className="text-[10px] text-slate-400 w-24 sm:w-32 truncate flex-shrink-0">{name.split('(')[0].trim()}</span>
+                      <div className="flex-1 h-3 sm:h-4 bg-slate-800/50 rounded overflow-hidden relative">
+                        <div className={`h-full rounded ${up ? "bg-green-500/60" : "bg-red-500/60"}`}
+                          style={{ width: `${w}%`, marginLeft: up ? '50%' : `${50 - w}%` }} />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className={`text-[9px] sm:text-[10px] font-bold ${up ? "text-green-300" : "text-red-300"}`}>
+                            {pct(v)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Top Stocks Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {(topStocks || []).map((s, i) => {
+                const up = s.change_pct > 0;
+                const intensity = Math.min(Math.abs(s.change_pct) * 30, 80);
+                return (
+                  <a key={i} href={`https://www.tradingview.com/chart/?symbol=${s.ticker}`}
+                    target="_blank" rel="noopener"
+                    className="rounded-lg p-2 sm:p-3 text-center hover:brightness-125 transition-all block"
+                    style={{
+                      background: up
+                        ? `rgba(0,230,118,${intensity/300})`
+                        : `rgba(255,23,68,${intensity/300})`,
+                      border: `1px solid ${up?"rgba(0,230,118,0.2)":"rgba(255,23,68,0.2)"}`
+                    }}>
+                    <div className="text-[10px] us-accent font-bold">{s.ticker}</div>
+                    <div className="text-[10px] text-slate-400 truncate">{s.name}</div>
+                    <div className={`text-sm font-bold mt-1 ${up?"text-green-400":"text-red-400"}`}>
+                      {pct(s.change_pct)}
+                    </div>
+                    {s.close && <div className="text-[10px] text-slate-500 mono">${parseFloat(s.close).toLocaleString()}</div>}
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function RatesEarnings({ rates, earnings, valuation }) {
+      return (
+        <div className="card-gradient rounded-xl border border-slate-700/50 mb-4 sm:mb-6 p-4">
+          <h3 className="text-sm font-bold text-slate-300 mb-3">💰 금리 / 실적 / 밸류에이션</h3>
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3 text-center">
+            {rates && (
+              <>
+                <div className="bg-slate-800/50 rounded-lg p-2">
+                  <div className="text-[10px] text-slate-500">US 10Y</div>
+                  <div className="text-sm font-bold mono text-white">{rates.us10y}%</div>
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-2">
+                  <div className="text-[10px] text-slate-500">US 2Y</div>
+                  <div className="text-sm font-bold mono text-white">{rates.us2y}%</div>
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-2">
+                  <div className="text-[10px] text-slate-500">10Y-2Y</div>
+                  <div className={`text-sm font-bold mono ${rates.yield_spread >= 0 ? "text-green-400" : "text-red-400"}`}>
+                    {rates.yield_spread >= 0 ? '+' : ''}{parseFloat(rates.yield_spread).toFixed(2)}%
+                  </div>
+                </div>
+              </>
+            )}
+            {earnings && (
+              <>
+                <div className="bg-slate-800/50 rounded-lg p-2">
+                  <div className="text-[10px] text-slate-500">EPS 성장률</div>
+                  <div className="text-sm font-bold mono text-green-400">{earnings.eps_growth}%</div>
+                </div>
+                <div className="bg-slate-800/50 rounded-lg p-2">
+                  <div className="text-[10px] text-slate-500">어닝 비트율</div>
+                  <div className="text-sm font-bold mono text-white">{earnings.beat_rate}</div>
+                </div>
+              </>
+            )}
+            {valuation && (
+              <div className="bg-slate-800/50 rounded-lg p-2">
+                <div className="text-[10px] text-slate-500">배당수익률</div>
+                <div className="text-sm font-bold mono text-yellow-300">{valuation.sp500_div_yield}%</div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    function DebateTimeline({ reports, critiques }) {
+      const [expanded, setExpanded] = useState(null);
+      return (
+        <div className="card-gradient rounded-xl border border-slate-700/50 mb-4 sm:mb-6">
+          <div className="p-4 border-b border-slate-700/50 flex items-center gap-2 flex-wrap">
+            <span className="text-lg">💬</span>
+            <h3 className="font-bold text-white">에이전트 토론 타임라인</h3>
+            <span className="text-xs text-slate-400 ml-2">Phase 1 독립 분석 → Phase 2 교차 반론</span>
+          </div>
+          <div className="p-3 sm:p-4 space-y-3 sm:space-y-4 max-h-[500px] overflow-y-auto">
+            {/* Phase 1 */}
+            <div className="text-xs text-slate-500 font-semibold uppercase tracking-wider py-1 border-b border-slate-700/30">
+              Phase 1 — 독립 분석 보고서
+            </div>
+            {(reports || []).map((r, i) => {
+              const ac = getAgentColor(r.agent_name);
+              return (
+                <div key={i} className={`flex gap-2 sm:gap-3 ${i % 2 === 0 ? "" : "flex-row-reverse"}`}>
+                  <div className="text-xl sm:text-2xl flex-shrink-0">{r.avatar}</div>
+                  <div className={`max-w-[85%] sm:max-w-[80%] ${i % 2 === 0 ? "bubble-left" : "bubble-right"} bg-slate-800/70 rounded-2xl p-3`}>
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span className="text-xs font-bold text-white">{r.agent_name}</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${stanceBg[r.stance]}`}>{r.stance}</span>
+                      <span className="text-[10px] text-slate-500">{r.confidence_score}%</span>
+                    </div>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      {expanded === `r${i}` ? r.analysis : (r.analysis || '').slice(0,120) + "..."}
+                    </p>
+                    <button onClick={() => setExpanded(expanded === `r${i}` ? null : `r${i}`)}
+                      className="text-xs text-blue-400 mt-1 hover:text-blue-300">
+                      {expanded === `r${i}` ? "접기" : "더 보기"}
+                    </button>
+                    {r.key_points && (
+                      <div className="mt-2 space-y-1">
+                        {r.key_points.slice(0,2).map((kp, j) => (
+                          <div key={j} className="text-[10px] sm:text-xs text-slate-400 flex gap-1">
+                            <span className="us-accent">▸</span>{kp}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Phase 2 */}
+            {critiques && critiques.length > 0 && (
+              <>
+                <div className="text-xs text-slate-500 font-semibold uppercase tracking-wider py-1 border-b border-slate-700/30 mt-4">
+                  Phase 2 — 교차 반론
+                </div>
+                {critiques.map((c, i) => {
+                  const isRight = i % 2 !== 0;
+                  const fromReport = (reports || []).find(r => r.agent_name === c.from_agent);
+                  const text = extractCritiqueText(c.critique);
+                  return (
+                    <div key={i} className={`flex gap-2 sm:gap-3 ${isRight ? "flex-row-reverse" : ""}`}>
+                      <div className="text-xl sm:text-2xl flex-shrink-0">{fromReport?.avatar || "🤖"}</div>
+                      <div className={`max-w-[85%] sm:max-w-[80%] ${isRight ? "bubble-right" : "bubble-left"} bg-slate-700/50 rounded-2xl p-3 border border-orange-700/20`}>
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span className="text-xs font-bold text-orange-300">{c.from_agent}</span>
+                          <span className="text-[10px] text-slate-500">→</span>
+                          <span className="text-xs text-slate-400">{c.to_agent}</span>
+                        </div>
+                        <p className="text-xs text-slate-300 leading-relaxed">
+                          {expanded === `c${i}` ? text : text.slice(0,150) + (text.length > 150 ? "..." : "")}
+                        </p>
+                        {text.length > 150 && (
+                          <button onClick={() => setExpanded(expanded === `c${i}` ? null : `c${i}`)}
+                            className="text-xs text-orange-400 mt-1 hover:text-orange-300">
+                            {expanded === `c${i}` ? "접기" : "더 보기"}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    function BacktestLeaderboard({ backtest }) {
+      if (!backtest) return null;
+      const { agent_rankings: rankings, yesterday_comparison: yc } = backtest;
+      return (
+        <div className="card-gradient rounded-xl border border-slate-700/50 mb-4 sm:mb-6">
+          <div className="p-4 border-b border-slate-700/50 flex items-center gap-2">
+            <span className="text-lg">🏆</span>
+            <h3 className="font-bold text-white">에이전트 적중률 리더보드</h3>
+            <span className="text-xs text-slate-400 ml-2">누적 백테스트 기준</span>
+          </div>
+          <div className="p-3 sm:p-4">
+            <div className="space-y-2 sm:space-y-3 mb-4">
+              {(rankings || []).map((r, i) => (
+                <div key={i} className="flex items-center gap-2 sm:gap-3">
+                  <div className="text-base sm:text-lg w-6 sm:w-8 text-center">{i===0?"🥇":i===1?"🥈":i===2?"🥉":i===3?"4️⃣":"5️⃣"}</div>
+                  <div className="text-lg sm:text-xl">{r.avatar}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs sm:text-sm font-semibold text-white truncate">{r.name}</span>
+                      <span className="text-[10px] sm:text-xs mono text-slate-400 flex-shrink-0">{r.correct}/{r.total_predictions}회</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 bg-slate-700/50 rounded-full h-2">
+                        <div className={`h-2 rounded-full progress-bar ${i===0?"bg-amber-400":i===1?"bg-slate-300":i===2?"bg-amber-600":"bg-slate-500"}`}
+                          style={{ width:`${r.hit_rate*100}%` }} />
+                      </div>
+                      <span className="mono text-xs sm:text-sm font-bold text-white w-10 sm:w-12 text-right">
+                        {(r.hit_rate*100).toFixed(0)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {yc && (
+              <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/30">
+                <div className="text-xs text-slate-400 mb-2">
+                  📅 전일({yc.date}) 실제 결과: <span className={yc.actual_movement==="UP"?"text-green-400":yc.actual_movement==="DOWN"?"text-red-400":"text-yellow-400"}>
+                    {yc.actual_movement==="UP"?"📈 상승":yc.actual_movement==="DOWN"?"📉 하락":"↔️ 횡보"}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                  {(yc.predictions || []).map((p, i) => (
+                    <div key={i} className={`flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-lg text-[10px] sm:text-xs
+                      ${p.was_correct?"bg-green-900/30 border border-green-700/30":"bg-red-900/30 border border-red-700/30"}`}>
+                      <span>{p.avatar}</span>
+                      <span className="text-white hidden sm:inline">{p.agent}</span>
+                      <span className={stanceColor[p.prediction]}>{p.prediction}</span>
+                      <span>{p.was_correct?"✓":"✗"}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    function Footer({ date, moderatorAgent }) {
+      return (
+        <div className="text-center py-6 sm:py-8 text-xs text-slate-600">
+          <div className="mb-1">🇺🇸 US Market Agent — Quintet Multi-Agent Debate System</div>
+          <div>오늘의 Moderator: <span className="text-slate-500">{moderatorAgent}</span> | {date}</div>
+          <div className="mt-1">⚠️ 본 보고서는 AI 생성 정보이며 투자 결정의 최종 책임은 투자자 본인에게 있습니다.</div>
+        </div>
+      );
+    }
+
+    // ─── 메인 앱 ─────────────────────────────────────
+    function App() {
+      const [report, setReport] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [usingSample, setUsingSample] = useState(false);
+
+      useEffect(() => {
+        async function loadData() {
+          const t = Date.now();
+          // 1차: daily_report.json
+          try {
+            const res = await fetch(`./data/daily_report.json?t=${t}`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data && data.date) { setReport(data); setLoading(false); return; }
+            }
+          } catch (_) {}
+
+          // 2차: history 폴백 (최근 7일)
+          const today = new Date();
+          for (let i = 0; i < 7; i++) {
+            const d = new Date(today);
+            d.setDate(d.getDate() - i);
+            const dateStr = d.toISOString().slice(0, 10);
+            try {
+              const res = await fetch(`../data/history/${dateStr}.json?t=${t}`);
+              if (res.ok) {
+                const data = await res.json();
+                if (data && data.date) { setReport(data); setLoading(false); return; }
+              }
+            } catch (_) {}
+          }
+
+          // 폴백: 샘플
+          setReport(SAMPLE);
+          setUsingSample(true);
+          setLoading(false);
         }
-      }
-    }
-  });
-}
+        loadData();
+      }, []);
 
-// ════════════════════════════════════════════════
-//  Stock Table
-// ════════════════════════════════════════════════
-function buildStockTable(stocks) {
-  const tbody = document.getElementById('usStockTable');
-  if (!tbody) return;
-  if (!stocks || stocks.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:20px">데이터 없음</td></tr>';
-    return;
-  }
-
-  // Sector mapping from ticker
-  const SECTOR_MAP = {
-    AAPL: 'Tech', MSFT: 'Tech', NVDA: 'Tech', GOOGL: 'Tech', META: 'Tech',
-    AMZN: 'Consumer', TSLA: 'Consumer', JPM: 'Finance', 'BRK-B': 'Finance',
-    JNJ: 'Healthcare', UNH: 'Healthcare', XOM: 'Energy', CVX: 'Energy'
-  };
-
-  tbody.innerHTML = stocks.map((s, i) => {
-    const { text, cls } = fmtChg(s.change_pct);
-    const dec   = s.close >= 1000 ? 0 : s.close >= 10 ? 2 : 2;
-    const surge = s.volume_change_pct || 0;
-    const surgeCol = Math.abs(surge) >= 30 ? 'var(--yellow)' :
-                     Math.abs(surge) >= 15 ? 'var(--green)'  : 'var(--text-muted)';
-    const secto  = s.sector || SECTOR_MAP[s.ticker] || '—';
-    const url    = `https://www.tradingview.com/chart/?symbol=${s.ticker}`;
-
-    return `
-    <tr>
-      <td class="rank">${i + 1}</td>
-      <td class="stock-name">
-        <a href="${url}" target="_blank" rel="noopener"
-           style="color:inherit;text-decoration:none;border-bottom:1px dashed var(--border-glow)"
-           title="TradingView 차트 열기">
-          <span style="color:var(--us-accent);font-size:10px;">${s.ticker}</span><br>
-          <span style="font-size:10px;color:var(--text-muted)">${s.name || ''}</span>
-        </a>
-      </td>
-      <td class="sector-tag">${secto}</td>
-      <td class="price">$${fmtNum(s.close, dec)}</td>
-      <td class="${cls}">${text}</td>
-      <td class="volume">${fmtMcap(s.market_cap_b)}</td>
-      <td class="volume" style="text-align:right;color:${surgeCol}">${fmtVolSurge(surge)}</td>
-    </tr>`;
-  }).join('');
-}
-
-// ════════════════════════════════════════════════
-//  Verdict Panel
-// ════════════════════════════════════════════════
-function renderVerdict(verdict, date) {
-  if (!verdict) return;
-
-  setText('verdictDate', date || '');
-  setText('verdictWeatherIcon', verdict.market_weather_icon || '⛅');
-
-  const stance = verdict.final_stance || 'HOLD';
-  const sv = document.getElementById('verdictStance');
-  if (sv) { sv.textContent = stance; sv.className = `stance-value ${stance}`; }
-  setText('verdictStanceEn', verdict.market_weather_en || '');
-
-  const conf = verdict.confidence_score || 0;
-  setText('verdictConf', conf + '%');
-  const bar = document.getElementById('verdictConfBar');
-  if (bar) setTimeout(() => bar.style.width = conf + '%', 100);
-
-  // Stance votes
-  const votes = verdict.stance_votes || {};
-  const vg = document.getElementById('stanceVotes');
-  if (vg) {
-    vg.innerHTML = Object.entries(votes).map(([agent, vstance]) => {
-      const key = detectAgentKey(agent);
-      const meta = AGENT_META[key];
-      return `<div class="vote-chip">
-        <span style="font-size:12px">${meta?.label || '🤖'}</span>
-        <span class="vote-agent">${agent}</span>
-        <span class="vote-stance ${vstance}">${vstance}</span>
-      </div>`;
-    }).join('');
-  }
-
-  setText('verdictSummary', verdict.summary || '—');
-
-  // Key insights
-  const insights = verdict.key_insights || [];
-  const ig = document.getElementById('verdictInsights');
-  if (ig) ig.innerHTML = insights.map(i => `<li>${i}</li>`).join('');
-
-  // Risk factors
-  const risks = verdict.risk_factors || [];
-  const rg = document.getElementById('verdictRisks');
-  if (rg) rg.innerHTML = risks.map(r => `<li>${r}</li>`).join('');
-
-  // Action items
-  const actions = verdict.action_items || [];
-  const ag = document.getElementById('verdictActions');
-  if (ag) ag.innerHTML = actions.map(a => `<li>${a}</li>`).join('');
-}
-
-// ════════════════════════════════════════════════
-//  Technical Indicators
-// ════════════════════════════════════════════════
-function renderTechnical(ti) {
-  if (!ti) return;
-
-  // RSI
-  const rsi = parseFloat(ti.rsi);
-  setText('rsiVal', rsi.toFixed(2));
-  const rsiPct = Math.min(Math.max(rsi, 0), 100);
-  const rsiNeedle = document.getElementById('rsiNeedle');
-  if (rsiNeedle) setTimeout(() => rsiNeedle.style.left = rsiPct + '%', 100);
-
-  let rsiStatus = '';
-  if (rsi < 30)      rsiStatus = '🔴 과매도 (Oversold) — 반등 가능성';
-  else if (rsi < 40) rsiStatus = '🟡 약세 하단 — 주의 필요';
-  else if (rsi < 60) rsiStatus = '🟢 중립 구간 (Neutral)';
-  else if (rsi < 70) rsiStatus = '🟡 강세 상단 — 모멘텀 강화';
-  else               rsiStatus = '🔴 과매수 (Overbought) — 조정 경계';
-  setText('rsiStatus', rsiStatus);
-
-  // MACD
-  const macd = parseFloat(ti.macd);
-  const sig  = parseFloat(ti.signal);
-  const hist = parseFloat(ti.histogram);
-  setText('macdVal', macd.toFixed(2));
-  const macdSign = document.getElementById('macdSign');
-  if (macdSign) {
-    const histCls = hist >= 0 ? 'color:var(--green)' : 'color:var(--red)';
-    macdSign.innerHTML = `<span style="${histCls};font-weight:700">Hist: ${hist >= 0 ? '+' : ''}${hist.toFixed(2)}</span>
-      <span style="color:var(--text-dim);font-size:9px">vs SIG ${sig.toFixed(2)}</span>`;
-  }
-  setText('macdHist', `${macd > sig ? '▲ MACD > Signal — 강세 신호' : '▼ MACD < Signal — 약세 신호'}`);
-
-  // BB Position
-  const bbPos = parseFloat(ti.bb_position);
-  setText('bbPosVal', (bbPos * 100).toFixed(1) + '%');
-  const bbNeedle = document.getElementById('bbNeedle');
-  if (bbNeedle) setTimeout(() => bbNeedle.style.left = (bbPos * 100) + '%', 120);
-
-  let bbStatus = '';
-  if (bbPos < 0.2)      bbStatus = '🔴 BB 하단 — 과매도 영역';
-  else if (bbPos < 0.4) bbStatus = '🟡 BB 하단 근접';
-  else if (bbPos < 0.6) bbStatus = '🟢 BB 중간 영역';
-  else if (bbPos < 0.8) bbStatus = '🟡 BB 상단 근접';
-  else                  bbStatus = '🔴 BB 상단 — 과매수 영역';
-  setText('bbStatus', bbStatus);
-
-  // MA Status
-  const maRow = document.getElementById('maRow');
-  if (maRow) {
-    const mas = [
-      { name: 'MA5',  diff: ti.ma5_diff_pct },
-      { name: 'MA20', diff: ti.ma20_diff_pct },
-      { name: 'MA60', diff: ti.ma60_diff_pct },
-    ];
-    maRow.innerHTML = mas.filter(m => m.diff !== undefined).map(m => {
-      const d = parseFloat(m.diff);
-      const cls = d >= 0 ? 'var(--green)' : 'var(--red)';
-      const sign = d >= 0 ? '+' : '';
-      return `<div class="ma-chip">
-        <span class="ma-name">${m.name}</span>
-        <span class="ma-diff" style="color:${cls}">${sign}${d.toFixed(2)}%</span>
-      </div>`;
-    }).join('');
-  }
-}
-
-// ════════════════════════════════════════════════
-//  Fed Watch
-// ════════════════════════════════════════════════
-function renderFedWatch(fedWatch) {
-  if (!fedWatch) return;
-  const hold = fedWatch.hold_prob || 0;
-  const cut  = fedWatch.cut_prob  || 0;
-  const hike = fedWatch.hike_prob || 0;
-
-  const setBar = (id, pct, label) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    setTimeout(() => {
-      el.style.width = pct + '%';
-      el.textContent = pct >= 12 ? pct + '%' : '';
-    }, 150);
-  };
-
-  setBar('fedHold', hold, '동결');
-  setBar('fedCut',  cut,  '인하');
-  setBar('fedHike', hike, '인상');
-}
-
-// ════════════════════════════════════════════════
-//  Rates & Earnings
-// ════════════════════════════════════════════════
-function renderRates(rates) {
-  if (!rates) return;
-  const spread = rates.yield_spread;
-  const spreadCls = spread >= 0 ? 'var(--green)' : 'var(--red)';
-  setText('r-10y',   (rates.us10y || '—') + '%');
-  setText('r-2y',    (rates.us2y  || '—') + '%');
-  const spreadEl = document.getElementById('r-spread');
-  if (spreadEl) {
-    spreadEl.textContent = (spread >= 0 ? '+' : '') + (spread || 0).toFixed(2) + '%';
-    spreadEl.style.color = spreadCls;
-  }
-  // also update index bar
-  const i10 = document.getElementById('us10y-val');
-  if (i10) { i10.textContent = (rates.us10y || '—') + '%'; }
-  const iSp = document.getElementById('spread-val');
-  if (iSp) {
-    iSp.textContent = (spread >= 0 ? '+' : '') + (spread || 0).toFixed(2) + '%';
-    iSp.className = 'index-val ' + (spread >= 0 ? 'up' : 'down');
-  }
-}
-
-function renderEarnings(earnings, valuation) {
-  if (earnings) {
-    setText('epsGrowth', earnings.eps_growth !== undefined ? earnings.eps_growth + '%' : '—');
-    setText('beatRate', earnings.beat_rate || '—');
-    const gt = (earnings.guidance_trend || '—').toLowerCase();
-    const gtEl = document.getElementById('guidanceTrend');
-    if (gtEl) {
-      const icon = gt.includes('positive') || gt.includes('up') ? '🟢 긍정적' :
-                   gt.includes('negative') || gt.includes('down') ? '🔴 부정적' : '🟡 중립';
-      gtEl.textContent = icon;
-    }
-  }
-  if (valuation) {
-    const dvYield = valuation.sp500_div_yield;
-    setText('divYield', dvYield !== undefined && dvYield !== null ? dvYield + '%' : '—');
-  }
-}
-
-// ════════════════════════════════════════════════
-//  Agent Cards (Phase 1)
-// ════════════════════════════════════════════════
-function renderAgents(reports) {
-  const grid = document.getElementById('agentsGrid');
-  if (!grid || !reports || reports.length === 0) return;
-
-  grid.innerHTML = reports.map((r, idx) => {
-    const key  = detectAgentKey(r.agent_name);
-    const meta = AGENT_META[key] || AGENT_META.TechMo;
-    const stance = r.stance || 'HOLD';
-    const conf   = r.confidence_score || 0;
-    const kps    = r.key_points || [];
-    const cardId = `agentCard_${idx}`;
-    const anlId  = `agentAnl_${idx}`;
-
-    // Confidence dots (10 dots total, filled by conf/10)
-    const filled = Math.round(conf / 10);
-    const dots = Array.from({length: 10}, (_, i) =>
-      `<div class="conf-dot ${i < filled ? 'active ' + meta.cls : ''}"></div>`
-    ).join('');
-
-    return `
-    <div class="agent-card ${meta.cls}" id="${cardId}">
-      <div class="agent-card-header">
-        <span class="agent-avatar">${r.avatar || meta.label}</span>
-        <div class="agent-name-wrap">
-          <div class="agent-name">${r.agent_name || meta.name}</div>
-          <div class="agent-role">${r.role || meta.role}</div>
+      if (loading) return (
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <div className="text-5xl mb-4 pulse-slow">🇺🇸</div>
+            <div className="text-slate-300 font-semibold">US Market Agent 데이터 로딩 중...</div>
+          </div>
         </div>
-        <span class="agent-stance ${stance}">${stance}</span>
-      </div>
-      <div class="agent-card-body">
-        <div class="agent-confidence">
-          <div class="conf-dots">${dots}</div>
-          <span class="conf-num">${conf}%</span>
+      );
+
+      const { date, generated_at, market_data: md, debate, verdict, backtest } = report;
+
+      return (
+        <div className="min-h-screen">
+          <Header date={date} generatedAt={generated_at} />
+          {usingSample && (
+            <div className="bg-amber-900/30 border-b border-amber-700/30 px-4 sm:px-6 py-2 text-xs text-amber-400 text-center">
+              ⚠️ 샘플 데이터 표시 중 — GitHub Actions 자동화 후 실제 데이터로 업데이트됩니다
+            </div>
+          )}
+
+          {/* Index Bar */}
+          <IndexBar data={md || {}} />
+
+          <div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+            {/* 투자 판단 Weather Card */}
+            <WeatherCard verdict={verdict} />
+
+            {/* Key Insights / Risks / Actions */}
+            <VerdictDetails verdict={verdict} />
+
+            {/* 기술적 지표 */}
+            <TechnicalIndicators ti={md?.technical_indicators} />
+
+            {/* Fed Watch */}
+            <FedWatch fedWatch={md?.fed_watch} />
+
+            {/* 2-column 레이아웃 */}
+            <div className="grid md:grid-cols-2 gap-4 sm:gap-6 mb-0">
+              {/* 왼쪽: Agent Stances + Rates */}
+              <div>
+                <AgentStanceCards reports={debate?.phase1_reports} />
+                <RatesEarnings rates={md?.rates} earnings={md?.earnings} valuation={md?.valuation} />
+                <BacktestLeaderboard backtest={backtest} />
+              </div>
+              {/* 오른쪽: Sector Heatmap */}
+              <div>
+                <SectorHeatmap sectors={md?.sectors} topSectors={verdict?.top_sectors} topStocks={md?.top_stocks} />
+              </div>
+            </div>
+
+            {/* 토론 타임라인 */}
+            <DebateTimeline reports={debate?.phase1_reports} critiques={debate?.phase2_critiques} />
+
+            <Footer date={date} moderatorAgent={verdict?.today_moderator_agent} />
+          </div>
         </div>
-        <div class="agent-key-points">
-          <div class="kp-title">핵심 포인트</div>
-          <ul class="kp-list">
-            ${kps.map(kp => `<li><span class="kp-bullet">●</span>${kp}</li>`).join('')}
-          </ul>
-        </div>
-        ${r.analysis ? `
-        <button class="agent-analysis-toggle" onclick="toggleAnalysis('${anlId}', this)">
-          ▼ 전문 분석 펼치기
-        </button>
-        <div class="agent-analysis-full" id="${anlId}">${r.analysis}</div>
-        ` : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function toggleAnalysis(id, btn) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const expanded = el.classList.toggle('expanded');
-  btn.textContent = expanded ? '▲ 전문 분석 접기' : '▼ 전문 분석 펼치기';
-}
-
-// ════════════════════════════════════════════════
-//  Phase 2 Critiques
-// ════════════════════════════════════════════════
-function extractCritiquesText(rawCritique) {
-  let text = rawCritique || '';
-  text = stripJsonFence(text);
-  // JSON → 텍스트 추출 시도
-  try {
-    const obj = JSON.parse(text);
-    const possible = obj.counter_argument || obj.critique || obj.rebuttal?.critique
-      || obj['반론_요약'] || obj.결론 || obj.counter || '';
-    if (possible) return possible;
-    return text;
-  } catch (_) {}
-  return text.replace(/[{}"\\]/g, '').replace(/\n+/g, ' ').trim().substring(0, 300);
-}
-
-function renderCritiques(critiques) {
-  const grid = document.getElementById('critiquesGrid');
-  if (!grid || !critiques || critiques.length === 0) return;
-
-  grid.innerHTML = critiques.map(c => {
-    const fromKey = detectAgentKey(c.from_agent || '');
-    const toKey   = detectAgentKey(c.to_agent   || '');
-    const fromMeta = AGENT_META[fromKey];
-    const toMeta   = AGENT_META[toKey];
-    const excerptText = extractCritiquesText(c.critique);
-
-    return `
-    <div class="critique-card">
-      <div class="critique-from">
-        <span class="cf-from-badge" style="background:${fromMeta.color}20;color:${fromMeta.color};">
-          ${fromMeta.label} ${c.from_agent || fromKey}
-        </span>
-        <span class="cf-arrow">→</span>
-        <span class="cf-to-badge" style="background:${toMeta.color}10;color:${toMeta.color};">
-          ${toMeta.label} ${c.to_agent || toKey}
-        </span>
-      </div>
-      <div style="font-size:10px;color:#8aaccc;line-height:1.6;">
-        ${excerptText.substring(0, 350)}${excerptText.length > 350 ? '…' : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ════════════════════════════════════════════════
-//  Countdown
-// ════════════════════════════════════════════════
-let countdownTimer = null;
-function startCountdown(ms) {
-  clearInterval(countdownTimer);
-  let rem = ms;
-  const el = document.getElementById('nextUpdate');
-  countdownTimer = setInterval(() => {
-    rem -= 1000;
-    if (rem <= 0) { clearInterval(countdownTimer); return; }
-    const m = Math.floor(rem / 60000);
-    const s = Math.floor((rem % 60000) / 1000);
-    if (el) el.textContent = `다음 갱신까지 ${m}분 ${s < 10 ? '0' + s : s}초`;
-  }, 1000);
-}
-
-// ════════════════════════════════════════════════
-//  Main Render
-// ════════════════════════════════════════════════
-function renderDashboard(data) {
-  const md  = data.market_data || {};
-  const sp  = md.sp500    || {};
-  const ndx = md.nasdaq   || {};
-  const dji = md.djia     || {};
-  const rut = md.russell  || {};
-  const vix = md.vix      || {};
-  const dxy = md.dxy      || {};
-
-  // ── Index Bar ──
-  setIdx('sp500-val', 'sp500-chg', sp.close,  sp.change_pct,  2);
-  setIdx('nasdaq-val','nasdaq-chg', ndx.close, ndx.change_pct, 2);
-  setIdx('djia-val',  'djia-chg',  dji.close, dji.change_pct, 0);
-  setIdx('rut-val',   'rut-chg',   rut.close, rut.change_pct, 2);
-  setIdx('vix-val',   'vix-chg',   vix.close, vix.change_pct, 2);
-  setIdx('dxy-val',   'dxy-chg',   dxy.close, dxy.change_pct, 2);
-
-  const us10yEl = document.getElementById('us10y-val');
-  if (us10yEl && md.rates) us10yEl.textContent = (md.rates.us10y || '—') + '%';
-  const us10ySub = document.getElementById('us10y-sub');
-  if (us10ySub && md.rates) {
-    const spread = md.rates.yield_spread;
-    us10ySub.textContent = spread >= 0 ? `+${spread.toFixed(2)}% spr` : `${spread.toFixed(2)}% spr`;
-    us10ySub.className   = 'index-chg ' + (spread >= 0 ? 'up' : 'down');
-  }
-  const spreadEl = document.getElementById('spread-val');
-  if (spreadEl && md.rates) {
-    const sp2 = md.rates.yield_spread;
-    spreadEl.textContent = (sp2 >= 0 ? '+' : '') + sp2.toFixed(2) + '%';
-    spreadEl.className = 'index-val ' + (sp2 >= 0 ? 'up' : 'down');
-  }
-
-  // ── Sector Chart ──
-  if (md.sectors) {
-    buildSectorChart('usSectorChart', md.sectors);
-    const up  = Object.values(md.sectors).filter(s => s.change_pct > 0).length;
-    const tot = Object.values(md.sectors).length;
-    setText('us-sentiment', `${up}/${tot} 섹터 상승`);
-  }
-
-  // ── Stock Table ──
-  if (md.top_stocks) buildStockTable(md.top_stocks);
-
-  // ── Technical ──
-  if (md.technical_indicators) renderTechnical(md.technical_indicators);
-
-  // ── Fed Watch ──
-  if (md.fed_watch) renderFedWatch(md.fed_watch);
-
-  // ── Rates ──
-  if (md.rates) renderRates(md.rates);
-
-  // ── Earnings / Valuation ──
-  renderEarnings(md.earnings, md.valuation);
-
-  // ── Verdict ──
-  renderVerdict(data.verdict, data.date);
-
-  // ── Agent Debate ──
-  if (data.debate) {
-    renderAgents(data.debate.phase1_reports || []);
-    renderCritiques(data.debate.phase2_critiques || []);
-  }
-
-  // ── Timestamp ──
-  setText('lastUpdate', data.generated_at
-    ? new Date(data.generated_at).toLocaleString('ko-KR')
-    : data.date || '—');
-
-  startCountdown(REFRESH_MS);
-}
-
-// ════════════════════════════════════════════════
-//  Mobile Tab Switcher
-// ════════════════════════════════════════════════
-const MOBILE_SECTIONS = {
-  verdict:   'mobileVerdict',
-  market:    'mobileMarket',
-  technical: 'mobileTechnical',
-  agents:    'mobileAgents',
-};
-
-function switchMobileTab(target) {
-  // Only applies on mobile
-  const isMobile = window.innerWidth <= 767;
-  if (!isMobile) return;
-
-  document.querySelectorAll('.mobile-tab').forEach(t =>
-    t.classList.toggle('active', t.dataset.target === target)
-  );
-  Object.entries(MOBILE_SECTIONS).forEach(([key, sectionId]) => {
-    const el = document.getElementById(sectionId);
-    if (!el) return;
-    if (key === target) {
-      el.classList.add('active');
-    } else {
-      el.classList.remove('active');
+      );
     }
-  });
-}
 
-function syncMobileSections() {
-  const isMobile = window.innerWidth <= 767;
-  Object.values(MOBILE_SECTIONS).forEach(sectionId => {
-    const el = document.getElementById(sectionId);
-    if (!el) return;
-    if (!isMobile) {
-      el.style.display = '';
-    }
-  });
-  if (isMobile) {
-    // 활성 탭만 표시
-    const activeTab = document.querySelector('.mobile-tab.active');
-    const target = activeTab ? activeTab.dataset.target : 'verdict';
-    switchMobileTab(target);
-  }
-}
-
-window.addEventListener('resize', syncMobileSections);
-
-// ════════════════════════════════════════════════
-//  Fetch & Init
-// ════════════════════════════════════════════════
-async function init() {
-  try {
-    const data = await loadLatestData();
-    document.getElementById('loadingOverlay').style.display = 'none';
-    renderDashboard(data);
-    // mobile sync after render
-    syncMobileSections();
-  } catch (e) {
-    console.error('Data load error:', e);
-    document.getElementById('loadingOverlay').style.display = 'none';
-    const eb = document.getElementById('errorBanner');
-    if (eb) {
-      eb.style.display = 'block';
-      eb.textContent = '⚠️ 데이터 로드 실패: ' + e.message + ' | GitHub Actions가 아직 실행 중이거나 data/history/ 경로에 파일이 없습니다.';
-    }
-  }
-}
-
-setInterval(async () => {
-  try {
-    const data = await loadLatestData();
-    renderDashboard(data);
-  } catch (_) {}
-}, REFRESH_MS);
-
-document.addEventListener('DOMContentLoaded', () => {
-  init();
-  syncMobileSections();
-});
-</script>
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
 </body>
 </html>
