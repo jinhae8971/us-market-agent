@@ -4,3 +4,6 @@ pandas>=2.1.0
 numpy>=1.26.0
 requests>=2.31.0
 python-dotenv>=1.0.0
+
+# 뉴스 에이전트 — RSS 날짜 파싱 (표준 라이브러리 email.utils 사용, 추가 패키지 불필요)
+# lxml>=4.9.0  # optional: XML 파싱 성능 향상 시 사용
