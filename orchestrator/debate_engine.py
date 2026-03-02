@@ -1,9 +1,19 @@
 """
-debate_engine.py — Phase 1 (독립 분석) + Phase 2 (교차 반론) 오케스트레이터
+debate_engine.py — 5인 에이전트 Phase 1 (독립 분석) + Phase 2 (교차 반론) 오케스트레이터
 
-에이전트 페어링:
-  TechMomentum(0) ↔ ValueFundamental(3) : 단기 기술 vs 장기 가치
-  MacroFed(1)     ↔ SectorRotation(2)   : 하향식 거시 vs 상향식 섹터
+에이전트 구성 (인덱스 순서):
+  TechMomentum(0)   — 기술적 모멘텀 단기 분석
+  MacroFed(1)       — Fed·거시경제 하향식 분석
+  SectorRotation(2) — 섹터 로테이션 상향식 분석
+  ValueFundamental(3) — 가치·펀더멘털 장기 분석
+  GlobalNews(4)     — 최근 24h 글로벌 뉴스 이벤트 드리븐 분석 [NEW]
+
+Phase 2 교차 반론 (5방향 체인):
+  TechMomentum(0)   → ValueFundamental(3) : 모멘텀 신호 vs 펀더멘털 가정
+  MacroFed(1)       → GlobalNews(4)       : 거시 흐름 vs 뉴스 노이즈
+  SectorRotation(2) → TechMomentum(0)     : 섹터 수급 vs 기술적 패턴
+  ValueFundamental(3) → MacroFed(1)       : 내재가치 vs 매크로 환경
+  GlobalNews(4)     → SectorRotation(2)   : 뉴스 촉매 vs 섹터 내러티브
 """
 import logging
 from typing import List
@@ -12,9 +22,14 @@ from agents.base_agent import AgentReport, AgentCritique, BaseAgent
 
 logger = logging.getLogger(__name__)
 
-# TechMo(0)→ValueFund(3), MacroFed(1)→SectorRot(2),
-# SectorRot(2)→MacroFed(1), ValueFund(3)→TechMo(0)
-CRITIQUE_PAIRS = [(0, 3), (1, 2), (2, 1), (3, 0)]
+# 5인 체인 반론 구조: 0→3→1→4→2→0
+CRITIQUE_PAIRS = [
+    (0, 3),   # TechMomentum   → ValueFundamental : 모멘텀 vs 펀더멘털
+    (1, 4),   # MacroFed       → GlobalNews       : 거시 vs 이벤트
+    (2, 0),   # SectorRotation → TechMomentum     : 섹터 수급 vs 기술 패턴
+    (3, 1),   # ValueFund      → MacroFed         : 내재가치 vs 매크로
+    (4, 2),   # GlobalNews     → SectorRotation   : 뉴스 촉매 vs 섹터 내러티브
+]
 
 
 class DebateEngine:
