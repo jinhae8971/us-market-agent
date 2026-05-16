@@ -51,7 +51,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-MODEL        = "claude-opus-4-5-20251101"
+MODEL        = "claude-sonnet-4-5-20250929"
 PAGES_URL    = "https://jinhae8971.github.io/us-market-agent/"
 TELEGRAM_TOKEN   = os.getenv("TELEGRAM_TOKEN",   "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
